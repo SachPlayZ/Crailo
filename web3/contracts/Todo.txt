@@ -1,0 +1,7 @@
+Validator {
+    Initial Stake
+    Current Stake
+    Rep Earned
+    No of Validations
+    Last Validated at
+}
