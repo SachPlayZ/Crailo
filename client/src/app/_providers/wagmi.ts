@@ -1,31 +1,23 @@
-"use client";
+import { http, cookieStorage, createConfig, createStorage } from "wagmi";
+import { coreTestnet2 } from "wagmi/chains";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 
-import { createConfig, http } from "wagmi";
-import { cookieStorage, createStorage } from "wagmi";
-import { getDefaultConfig } from "connectkit";
-import { sepolia } from "wagmi/chains";
-
-export const config = createConfig(
-    getDefaultConfig({
-        enableFamily: false,
-        chains: [sepolia],
-        transports: {
-            // RPC URL for each chain
-            [sepolia.id]: http(),
-        },
+export function getConfig(connectors: ReturnType<typeof connectorsForWallets>) {
+    return createConfig({
+        chains: [coreTestnet2],
+        connectors,
         storage: createStorage({
             storage: cookieStorage,
         }),
+        ssr: true,
+        transports: {
+            [coreTestnet2.id]: http(),
+        },
+    });
+}
 
-        // Required API Keys
-        walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "default_project_id",
-
-        // Required App Info
-        appName: "AltNode",
-
-        // Optional App Info
-        appDescription: "Decentralised AI Ecosystem",
-        // appUrl: "https://family.co", // your app's url
-        // appIcon: "https://family.co/logo.png",
-    })
-);
+declare module "wagmi" {
+    interface Register {
+        config: ReturnType<typeof getConfig>;
+    }
+}
