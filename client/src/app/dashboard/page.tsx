@@ -33,8 +33,6 @@ import {
   Trash2,
   TruckIcon,
   Upload,
-  Plus,
-  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -88,7 +86,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       case "Delivered":
         return (
           <Badge
-            className={`${baseClasses} bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400 border-green-200 dark:border-green-800 shadow-green-500/25`}
+            className={`${baseClasses} bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 shadow-green-500/25`}
           >
             <CheckCircle className="w-3 h-3 mr-1" />
             {status}
@@ -97,7 +95,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       case "Awaiting Delivery":
         return (
           <Badge
-            className={`${baseClasses} bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 shadow-yellow-500/25`}
+            className={`${baseClasses} bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-300 shadow-yellow-500/25`}
           >
             <Clock className="w-3 h-3 mr-1" />
             {status}
@@ -106,7 +104,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       case "Dispute Raised":
         return (
           <Badge
-            className={`${baseClasses} bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400 border-red-200 dark:border-red-800 shadow-red-500/25`}
+            className={`${baseClasses} bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-300 shadow-red-500/25`}
           >
             <AlertTriangle className="w-3 h-3 mr-1" />
             {status}
@@ -115,7 +113,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       default:
         return (
           <Badge
-            className={`${baseClasses} bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-400 border-gray-200 dark:border-gray-800`}
+            className={`${baseClasses} bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-300`}
           >
             {status}
           </Badge>
@@ -126,7 +124,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       case "Available":
         return (
           <Badge
-            className={`${baseClasses} bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400 border-green-200 dark:border-green-800 shadow-green-500/25`}
+            className={`${baseClasses} bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 shadow-green-500/25`}
           >
             <Package className="w-3 h-3 mr-1" />
             {status}
@@ -135,7 +133,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       case "Sold":
         return (
           <Badge
-            className={`${baseClasses} bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400 border-blue-200 dark:border-blue-800 shadow-blue-500/25`}
+            className={`${baseClasses} bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 shadow-blue-500/25`}
           >
             <CheckCircle className="w-3 h-3 mr-1" />
             {status}
@@ -144,7 +142,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       case "Under Dispute":
         return (
           <Badge
-            className={`${baseClasses} bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400 border-red-200 dark:border-red-800 shadow-red-500/25`}
+            className={`${baseClasses} bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-300 shadow-red-500/25`}
           >
             <AlertTriangle className="w-3 h-3 mr-1" />
             {status}
@@ -153,7 +151,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
       default:
         return (
           <Badge
-            className={`${baseClasses} bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-400 border-gray-200 dark:border-gray-800`}
+            className={`${baseClasses} bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-300`}
           >
             {status}
           </Badge>
@@ -200,12 +198,10 @@ export default function CrailoDashboard() {
     address as string
   );
   const [activeTab, setActiveTab] = useState("buying");
-  const [buyingHistory, setBuyingHistory] = useState<Listing[]>([]);
-  const [myListings, setMyListings] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [disputeImages, setDisputeImages] = useState<string[]>([]);
-  const { cancelListing } = useListing();
   const { createDispute } = useCreateDispute();
 
   const form = useForm<DisputeFormValues>({
@@ -216,29 +212,50 @@ export default function CrailoDashboard() {
     },
   });
 
+  useEffect(() => {
+    handleHistoryClick();
+  }, []);
+
   const handleHistoryClick = async () => {
-    if (address) {
-      await getUserHistoryData();
+    try {
+      const history = await getUserHistoryData();
+      if (Array.isArray(history)) {
+        // Fetch metadata for each listing
+        const listingsWithMetadata = await Promise.all(
+          history.map(async (listing: Listing) => {
+            try {
+              const metadataResponse = await fetch(listing.imageHash);
+              const metadata = await metadataResponse.json();
+              return { ...listing, metadata };
+            } catch (error) {
+              console.error("Error fetching metadata for listing:", error);
+              return listing;
+            }
+          })
+        );
+        setListings(listingsWithMetadata);
+      }
+    } catch (error) {
+      console.error("Error fetching user history:", error);
     }
   };
 
-  useEffect(() => {
-    if (historyListings && Array.isArray(historyListings)) {
-      const buying = historyListings.filter(
-        (item: Listing) => item.buyer === address
-      );
-      const listings = historyListings.filter(
-        (item: Listing) => item.seller === address
-      );
-      setBuyingHistory(buying);
-      setMyListings(listings);
-    }
-  }, [historyListings, address]);
+  const buyingHistory = listings.filter(
+    (item) => item.buyer.toLowerCase() === (address as string)?.toLowerCase()
+  );
+  const myListings = listings.filter(
+    (item) => item.seller.toLowerCase() === (address as string)?.toLowerCase()
+  );
+
+  const disputeCount = listings.filter((item) => item.status === 2).length;
+
+  const { cancelListing } = useListing();
 
   const removeListing = (id: number) => async () => {
     try {
       await cancelListing(id);
-      await handleHistoryClick(); // Refresh the listings
+      // Optionally, refetch listings or update state to reflect removal
+      console.log(`Listing ${id} removed successfully`);
     } catch (error) {
       console.error("Error removing listing:", error);
     }
@@ -257,7 +274,8 @@ export default function CrailoDashboard() {
   };
 
   const handleDisputeClick = (listing: Listing) => {
-    openDisputeDialog(listing);
+    setSelectedListing(listing);
+    setDisputeDialogOpen(true);
   };
 
   const handleImageUpload = async (
@@ -266,43 +284,68 @@ export default function CrailoDashboard() {
     const files = event.target.files;
     if (!files) return;
 
-    const newImages: string[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (disputeImages.length + newImages.length >= 5) break;
+    const imageUrls: string[] = [];
 
+    // Upload each image to IPFS
+    for (const file of Array.from(files)) {
       try {
-        const formData = new FormData();
-        formData.append("file", file);
+        const upload = await pinata.upload.public.file(file);
+        const response = upload as any;
+        const ipfsHash =
+          response.cid || (response.data && response.data.IpfsHash);
 
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          newImages.push(data.url);
+        if (ipfsHash) {
+          const ipfsUrl = `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${ipfsHash}`;
+          imageUrls.push(ipfsUrl);
         }
       } catch (error) {
-        console.error("Error uploading image:", error);
+        console.error("Error uploading image to IPFS:", error);
       }
     }
 
-    setDisputeImages((prev) => [...prev, ...newImages]);
+    setDisputeImages((prev) => {
+      const updated = [...prev, ...imageUrls];
+      return updated.slice(0, 5); // Limit to 5 images
+    });
   };
 
   const onDisputeSubmit = async (values: DisputeFormValues) => {
-    if (!selectedListing || !address) return;
+    if (!selectedListing) return;
 
     try {
+      // Create dispute evidence JSON
+      const disputeEvidence = {
+        reason: values.reason,
+        images: disputeImages,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Convert to JSON string
+      const jsonString = JSON.stringify(disputeEvidence);
+
+      // Create a Blob from the JSON string
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const file = new File([blob], "dispute-evidence.json");
+
+      // Upload JSON to IPFS
+      const upload = await pinata.upload.public.file(file);
+      const response = upload as any;
+      const ipfsHash =
+        response.cid || (response.data && response.data.IpfsHash);
+
+      if (!ipfsHash) {
+        throw new Error("Failed to upload evidence to IPFS");
+      }
+
+      // Create the dispute with the IPFS hash of the JSON
       await createDispute({
-        listingId: selectedListing.id.toString(),
-        buyer: address,
+        listingId: Number(selectedListing.id),
+        buyer: address as string,
         seller: selectedListing.seller,
         reason: values.reason,
-        imageHash: disputeImages.join(",") || "",
+        imageHash: `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${ipfsHash}`,
       });
+
       setDisputeDialogOpen(false);
       setSelectedListing(null);
       setDisputeImages([]);
@@ -314,30 +357,24 @@ export default function CrailoDashboard() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-green-50 via-background to-emerald-50 dark:from-green-950 dark:via-background dark:to-emerald-900 overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-200/30 dark:bg-green-800/30 rounded-full blur-3xl animate-float"></div>
-        <div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-200/30 dark:bg-emerald-800/30 rounded-full blur-3xl animate-float"
-          style={{ animationDelay: "1s" }}
-        ></div>
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-green-100/20 dark:bg-green-900/20 rounded-full blur-3xl animate-float"
-          style={{ animationDelay: "2s" }}
-        ></div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-green-400/10 to-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-400/10 to-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-400/5 to-pink-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Dialog for raising dispute */}
         <Dialog open={disputeDialogOpen} onOpenChange={setDisputeDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-xl border border-border/50">
+          <DialogContent className="sm:max-w-[500px] bg-gray-900/95 backdrop-blur-xl border border-gray-700/50">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-foreground">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Raise a Dispute
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground">
+              <DialogDescription className="text-gray-400">
                 Please provide details about your dispute. Add up to 5 images as
                 evidence.
               </DialogDescription>
@@ -353,13 +390,13 @@ export default function CrailoDashboard() {
                   name="reason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-foreground">
+                      <FormLabel className="text-white">
                         Reason for Dispute
                       </FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Please explain your reason for raising this dispute..."
-                          className="bg-background/50 border-border/50 text-foreground"
+                          className="bg-gray-800/50 border-gray-700/50 text-white"
                           {...field}
                         />
                       </FormControl>
@@ -369,9 +406,7 @@ export default function CrailoDashboard() {
                 />
 
                 <div className="space-y-4">
-                  <FormLabel className="text-foreground">
-                    Evidence Images
-                  </FormLabel>
+                  <FormLabel className="text-white">Evidence Images</FormLabel>
                   <div className="grid grid-cols-5 gap-4">
                     {disputeImages.map((image, index) => (
                       <div key={index} className="relative">
@@ -380,7 +415,7 @@ export default function CrailoDashboard() {
                           alt={`Evidence ${index + 1}`}
                           width={80}
                           height={80}
-                          className="rounded-lg object-cover border border-border/50"
+                          className="rounded-lg object-cover border border-gray-700/50"
                         />
                         <Button
                           type="button"
@@ -398,7 +433,7 @@ export default function CrailoDashboard() {
                       </div>
                     ))}
                     {disputeImages.length < 5 && (
-                      <label className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 border-dashed border-border/50 hover:border-green-500/50 transition-colors bg-background/50">
+                      <label className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 border-dashed border-gray-700/50 hover:border-green-500/50 transition-colors">
                         <input
                           type="file"
                           accept="image/*"
@@ -406,11 +441,11 @@ export default function CrailoDashboard() {
                           onChange={handleImageUpload}
                           multiple={true}
                         />
-                        <Upload className="w-6 h-6 text-muted-foreground" />
+                        <Upload className="w-6 h-6 text-gray-400" />
                       </label>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-400">
                     {5 - disputeImages.length} image slots remaining
                   </p>
                 </div>
@@ -420,13 +455,13 @@ export default function CrailoDashboard() {
                     type="button"
                     variant="outline"
                     onClick={() => setDisputeDialogOpen(false)}
-                    className="border border-border/50 text-foreground hover:bg-background/50"
+                    className="border border-gray-700/50 text-gray-300 hover:bg-gray-800/50"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+                    className="bg-gradient-to-r from-green-400 to-emerald-500 text-white hover:from-green-500 hover:to-emerald-600"
                   >
                     Submit Dispute
                   </Button>
@@ -436,53 +471,33 @@ export default function CrailoDashboard() {
           </DialogContent>
         </Dialog>
 
-        {/* Header Section */}
-        <div className="relative z-10 bg-card/80 backdrop-blur-sm border-b border-border/50 mb-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
-              <div className="space-y-2">
-                <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-                  My Dashboard
-                </h1>
-                <p className="text-muted-foreground text-lg">
-                  Manage your purchases and listings on Crailo
-                </p>
-              </div>
-
-              <Button
-                onClick={handleHistoryClick}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 px-8 py-3 relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                Refresh History
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                {/* Enhanced animated border trail */}
-                <div className="absolute inset-0 rounded-lg border-2 border-transparent">
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500"></div>
-                  </div>
-                </div>
-                {/* Enhanced trail effect */}
-                <div className="absolute -inset-2 bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity duration-500"></div>
-                {/* Additional glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-green-300 via-emerald-300 to-green-300 rounded-lg blur-sm opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-              </Button>
-            </div>
-          </div>
+        <div className="mb-8">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
+            My Dashboard
+          </h2>
+          <Button
+            onClick={handleHistoryClick}
+            className="mb-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white"
+          >
+            Get History
+          </Button>
+          <p className="text-gray-400 text-lg">
+            Manage your purchases and listings on Crailo
+          </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 backdrop-blur-xl bg-card/50 border border-border/50 shadow-2xl rounded-xl p-1">
+          <TabsList className="grid w-full grid-cols-2 mb-8 backdrop-blur-xl bg-gray-800/50 border border-gray-700/50 shadow-2xl rounded-xl p-1">
             <TabsTrigger
               value="buying"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/25 font-medium text-foreground data-[state=inactive]:hover:text-green-600 dark:data-[state=inactive]:hover:text-green-400 transition-all duration-300 rounded-lg"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-400 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-400/25 font-medium text-gray-300 data-[state=inactive]:hover:text-white transition-all duration-300 rounded-lg"
             >
               <TruckIcon className="w-4 h-4 mr-2" />
               Buying History
             </TabsTrigger>
             <TabsTrigger
               value="listings"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/25 font-medium text-foreground data-[state=inactive]:hover:text-green-600 dark:data-[state=inactive]:hover:text-green-400 transition-all duration-300 rounded-lg"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-400 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-400/25 font-medium text-gray-300 data-[state=inactive]:hover:text-white transition-all duration-300 rounded-lg"
             >
               <Package className="w-4 h-4 mr-2" />
               My Listings
@@ -492,13 +507,13 @@ export default function CrailoDashboard() {
           {/* Buying History Tab */}
           <TabsContent value="buying" className="space-y-6">
             {buyingHistory.length === 0 ? (
-              <Card className="text-center py-12 backdrop-blur-xl bg-card/30 border border-border/50 shadow-2xl rounded-2xl">
+              <Card className="text-center py-12 backdrop-blur-xl bg-gray-800/30 border border-gray-700/50 shadow-2xl rounded-2xl">
                 <CardContent>
-                  <TruckIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
+                  <TruckIcon className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-white mb-2">
                     No purchases yet
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-gray-400">
                     Start exploring products on Crailo to see your buying
                     history here.
                   </p>
@@ -509,7 +524,7 @@ export default function CrailoDashboard() {
                 {buyingHistory.map((item) => (
                   <Card
                     key={Number(item.id)}
-                    className="group hover:scale-[1.02] transition-all duration-500 backdrop-blur-xl bg-card/90 border border-border/50 hover:border-green-300 dark:hover:border-green-700 shadow-2xl hover:shadow-green-500/10 rounded-2xl overflow-hidden"
+                    className="group hover:scale-[1.02] transition-all duration-500 backdrop-blur-xl bg-gradient-to-r from-gray-800/40 to-gray-700/40 border border-gray-600/50 hover:border-green-400/50 shadow-2xl hover:shadow-green-400/10 rounded-2xl overflow-hidden"
                   >
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-4">
@@ -520,23 +535,23 @@ export default function CrailoDashboard() {
                             alt={item.metadata?.title || "Product Image"}
                             width={80}
                             height={80}
-                            className="rounded-xl object-cover border border-border/50 relative z-10 group-hover:border-green-400/50 transition-colors duration-300"
+                            className="rounded-xl object-cover border border-gray-600/50 relative z-10 group-hover:border-green-400/50 transition-colors duration-300"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                              <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-1">
                                 {item.metadata?.title || "Untitled Product"}
                               </h3>
-                              <p className="text-sm text-muted-foreground mb-2">
+                              <p className="text-sm text-gray-400 mb-2">
                                 Sold by:{" "}
-                                <span className="font-medium text-foreground">
+                                <span className="font-medium text-gray-300">
                                   {item.metadata?.seller.name ||
                                     "Unknown Seller"}
                                 </span>
                               </p>
-                              <p className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                              <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
                                 ${formatPrice(item.price)}
                               </p>
                             </div>
@@ -545,21 +560,21 @@ export default function CrailoDashboard() {
                                 getStatusFromNumber(item.status),
                                 "buying"
                               )}
-                              <p className="text-xs text-muted-foreground mt-2">
+                              <p className="text-xs text-gray-500 mt-2">
                                 Ordered: {formatDate(item.createdAt)}
                               </p>
                             </div>
                           </div>
                           <div className="flex space-x-3 mt-4">
                             <Button
-                              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25 rounded-xl"
+                              className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-400/25 rounded-xl"
                               disabled={item.status !== 1}
                             >
                               Release Escrow
                             </Button>
                             <Button
                               variant="outline"
-                              className="border border-red-400/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300 hover:border-red-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
+                              className="border border-red-400/50 text-red-400 hover:bg-red-400/10 hover:text-red-300 hover:border-red-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
                               disabled={item.status === 2}
                               onClick={() => handleDisputeClick(item)}
                             >
@@ -579,16 +594,16 @@ export default function CrailoDashboard() {
           {/* My Listings Tab */}
           <TabsContent value="listings" className="space-y-6">
             {myListings.length === 0 ? (
-              <Card className="text-center py-12 backdrop-blur-xl bg-card/30 border border-border/50 shadow-2xl rounded-2xl">
+              <Card className="text-center py-12 backdrop-blur-xl bg-gray-800/30 border border-gray-700/50 shadow-2xl rounded-2xl">
                 <CardContent>
-                  <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
+                  <Package className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-white mb-2">
                     No items listed
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-gray-400">
                     Create your first listing to start selling on Crailo.
                   </p>
-                  <Button className="mt-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-green-500/25 transition-all duration-300 rounded-xl">
+                  <Button className="mt-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-green-400/25 transition-all duration-300 rounded-xl">
                     Create Listing
                   </Button>
                 </CardContent>
@@ -598,7 +613,7 @@ export default function CrailoDashboard() {
                 {myListings.map((item) => (
                   <Card
                     key={Number(item.id)}
-                    className="group hover:scale-[1.02] transition-all duration-500 backdrop-blur-xl bg-card/90 border border-border/50 hover:border-green-300 dark:hover:border-green-700 shadow-2xl hover:shadow-green-500/10 rounded-2xl overflow-hidden"
+                    className="group hover:scale-[1.02] transition-all duration-500 backdrop-blur-xl bg-gradient-to-r from-gray-800/40 to-gray-700/40 border border-gray-600/50 hover:border-green-400/50 shadow-2xl hover:shadow-green-400/10 rounded-2xl overflow-hidden"
                   >
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-4">
@@ -609,16 +624,16 @@ export default function CrailoDashboard() {
                             alt={item.metadata?.title || "Product Image"}
                             width={80}
                             height={80}
-                            className="rounded-xl object-cover border border-border/50 relative z-10 group-hover:border-green-400/50 transition-colors duration-300"
+                            className="rounded-xl object-cover border border-gray-600/50 relative z-10 group-hover:border-green-400/50 transition-colors duration-300"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                              <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-1">
                                 {item.metadata?.title || "Untitled Product"}
                               </h3>
-                              <p className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent mb-2">
+                              <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent mb-2">
                                 ${formatPrice(item.price)}
                               </p>
                             </div>
@@ -627,7 +642,7 @@ export default function CrailoDashboard() {
                                 getStatusFromNumber(item.status),
                                 "listing"
                               )}
-                              <p className="text-xs text-muted-foreground mt-2">
+                              <p className="text-xs text-gray-500 mt-2">
                                 Listed: {formatDate(item.createdAt)}
                               </p>
                             </div>
@@ -635,7 +650,7 @@ export default function CrailoDashboard() {
                           <div className="flex space-x-3 mt-4">
                             <Button
                               variant="outline"
-                              className="border border-red-400/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300 hover:border-red-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
+                              className="border border-red-400/50 text-red-400 hover:bg-red-400/10 hover:text-red-300 hover:border-red-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
                               disabled={item.status >= 1}
                               onClick={removeListing(Number(item.id))}
                             >

@@ -23,6 +23,21 @@ contract DisputeContract is Ownable {
         mapping(address => bool) hasVoted;
     }
 
+    // Struct for returning dispute data (without mapping)
+    struct DisputeView {
+        uint256 id;
+        uint256 listingId;
+        address buyer;
+        address seller;
+        string imageHash;
+        string reason;
+        uint256 createdAt;
+        uint256 deadline;
+        DisputeStatus status;
+        uint256 yesVotes;
+        uint256 noVotes;
+    }
+
     enum DisputeStatus {
         Active,
         ResolvedYes, // Product matches description
@@ -150,6 +165,41 @@ contract DisputeContract is Ownable {
 
     function getActiveDisputes() external view returns (uint256[] memory) {
         return activeDisputes;
+    }
+
+    /**
+     * @notice Get all active disputes with complete details in a single call
+     * @return Array of DisputeView structs containing all dispute information
+     */
+    function getAllActiveDisputesDetails()
+        external
+        view
+        returns (DisputeView[] memory)
+    {
+        DisputeView[] memory activeDisputesDetails = new DisputeView[](
+            activeDisputes.length
+        );
+
+        for (uint256 i = 0; i < activeDisputes.length; i++) {
+            uint256 disputeId = activeDisputes[i];
+            Dispute storage dispute = disputes[disputeId];
+
+            activeDisputesDetails[i] = DisputeView({
+                id: dispute.id,
+                listingId: dispute.listingId,
+                buyer: dispute.buyer,
+                seller: dispute.seller,
+                imageHash: dispute.imageHash,
+                reason: dispute.reason,
+                createdAt: dispute.createdAt,
+                deadline: dispute.deadline,
+                status: dispute.status,
+                yesVotes: dispute.yesVotes,
+                noVotes: dispute.noVotes
+            });
+        }
+
+        return activeDisputesDetails;
     }
 
     function getDispute(

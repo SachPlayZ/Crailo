@@ -12,7 +12,7 @@ export function useCreateDispute() {
     seller,
     reason,
   }: {
-    listingId: string; // or string if you prefer and convert it to BigInt
+    listingId: string;
     buyer: string;
     imageHash: string;
     seller: string;
@@ -60,6 +60,23 @@ export function getActiveDisputes() {
   });
 
   return { data, isLoading, isSuccess, isError, error };
+}
+
+export function getDisputesArr() {
+  const {
+    data: activeDisputeDetails,
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+  } = useReadContract({
+    address: disputeAddress,
+    abi: disputeABI,
+    functionName: "getAllActiveDisputesDetails",
+    args: [],
+  });
+
+  return { activeDisputeDetails, isLoading, isSuccess, isError, error };
 }
 
 // Hook returns functions for reading dispute data and checking validator vote

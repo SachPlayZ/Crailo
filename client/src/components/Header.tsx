@@ -5,22 +5,22 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-    Moon,
-    Sun,
-    User,
-    LogOut,
-    Shield,
-    CheckCircle,
-    Clock,
+  Moon,
+  Sun,
+  User,
+  LogOut,
+  Shield,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -28,107 +28,107 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
-    darkMode: boolean;
-    toggleDarkMode: () => void;
+  darkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
 export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
-    const { data: session, status } = useSession();
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [kycStatus, setKycStatus] = useState<string | null>(null);
-    const [isKycVerified, setIsKycVerified] = useState(false);
-    const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [kycStatus, setKycStatus] = useState<string | null>(null);
+  const [isKycVerified, setIsKycVerified] = useState(false);
+  const pathname = usePathname();
 
-    // Fetch KYC status when session changes
-    useEffect(() => {
-        const fetchKycStatus = async () => {
-            if (session?.user?.email) {
-                try {
-                    const response = await fetch("/api/kyc");
-                    if (response.ok) {
-                        const data = await response.json();
-                        setKycStatus(data.kycStatus);
-                        setIsKycVerified(data.isKycVerified);
-                    }
-                } catch (error) {
-                    console.error("Error fetching KYC status:", error);
-                }
-            }
-        };
-
-        if (session) {
-            fetchKycStatus();
+  // Fetch KYC status when session changes
+  useEffect(() => {
+    const fetchKycStatus = async () => {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch("/api/kyc");
+          if (response.ok) {
+            const data = await response.json();
+            setKycStatus(data.kycStatus);
+            setIsKycVerified(data.isKycVerified);
+          }
+        } catch (error) {
+          console.error("Error fetching KYC status:", error);
         }
-    }, [session]);
-
-    const scrollToSection = (sectionId: string) => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-            element.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        }
+      }
     };
 
-    const handleSignOut = () => {
-        signOut({ callbackUrl: "/" });
-    };
+    if (session) {
+      fetchKycStatus();
+    }
+  }, [session]);
 
-    const getKycStatusIcon = () => {
-        if (isKycVerified || kycStatus === "approved") {
-            return <CheckCircle className="h-4 w-4 text-green-600" />;
-        }
-        if (kycStatus === "pending") {
-            return <Clock className="h-4 w-4 text-yellow-600" />;
-        }
-        return <Shield className="h-4 w-4 text-gray-600" />;
-    };
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
 
-    const getKycStatusText = () => {
-        if (isKycVerified || kycStatus === "approved") {
-            return "KYC Verified";
-        }
-        if (kycStatus === "pending") {
-            return "KYC Pending";
-        }
-        if (kycStatus === "rejected") {
-            return "KYC Rejected";
-        }
-        return "KYC Required";
-    };
+  const handleSignOut = () => {
+    signOut({ callbackUrl: "/" });
+  };
 
-    const getKycStatusColor = () => {
-        if (isKycVerified || kycStatus === "approved") {
-            return "text-green-600";
-        }
-        if (kycStatus === "pending") {
-            return "text-yellow-600";
-        }
-        if (kycStatus === "rejected") {
-            return "text-red-600";
-        }
-        return "text-gray-600";
-    };
+  const getKycStatusIcon = () => {
+    if (isKycVerified || kycStatus === "approved") {
+      return <CheckCircle className="h-4 w-4 text-green-600" />;
+    }
+    if (kycStatus === "pending") {
+      return <Clock className="h-4 w-4 text-yellow-600" />;
+    }
+    return <Shield className="h-4 w-4 text-gray-600" />;
+  };
 
-    return (
-        <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="max-w-7xl mx-auto grid grid-cols-12 h-16 items-center px-4 sm:px-6 lg:px-8">
-                {/* Logo - Column 1 */}
-                <div className="col-start-1 col-span-2">
-                    <Link href="/" className="flex items-center group">
-                        <div className="h-16 w-24 transition-transform group-hover:scale-110 relative">
-                            <div className="absolute inset-0 bg-green-500/30 rounded-lg blur-xl transition-all duration-300 group-hover:blur-2xl group-hover:bg-green-400/50"></div>
-                            <Image
-                                src="/logo.png"
-                                alt="Crailo"
-                                width={64}
-                                height={64}
-                                className="h-full w-full object-contain relative z-10 drop-shadow-[0_4px_32px_rgba(16,185,129,0.45)] group-hover:drop-shadow-[0_8px_48px_rgba(34,197,94,0.7)]"
-                            />
-                        </div>
-                    </Link>
-                </div>
+  const getKycStatusText = () => {
+    if (isKycVerified || kycStatus === "approved") {
+      return "KYC Verified";
+    }
+    if (kycStatus === "pending") {
+      return "KYC Pending";
+    }
+    if (kycStatus === "rejected") {
+      return "KYC Rejected";
+    }
+    return "KYC Required";
+  };
+
+  const getKycStatusColor = () => {
+    if (isKycVerified || kycStatus === "approved") {
+      return "text-green-600";
+    }
+    if (kycStatus === "pending") {
+      return "text-yellow-600";
+    }
+    if (kycStatus === "rejected") {
+      return "text-red-600";
+    }
+    return "text-gray-600";
+  };
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 h-16 items-center px-4 sm:px-6 lg:px-8">
+        {/* Logo - Column 1 */}
+        <div className="col-start-1 col-span-2">
+          <Link href="/" className="flex items-center group">
+            <div className="h-16 w-24 transition-transform group-hover:scale-110 relative">
+              <div className="absolute inset-0 bg-green-500/30 rounded-lg blur-xl transition-all duration-300 group-hover:blur-2xl group-hover:bg-green-400/50"></div>
+              <Image
+                src="/logo.png"
+                alt="Crailo"
+                width={64}
+                height={64}
+                className="h-full w-full object-contain relative z-10 drop-shadow-[0_4px_32px_rgba(16,185,129,0.45)] group-hover:drop-shadow-[0_8px_48px_rgba(34,197,94,0.7)]"
+              />
+            </div>
+          </Link>
+        </div>
 
         {/* Centered Navigation - Columns 3-10 */}
         <nav className="col-start-3 col-span-7 hidden md:flex items-center justify-center space-x-8">
@@ -268,99 +268,89 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
             )}
           </Button>
 
-                    {status === "loading" ? (
-                        <div className="h-9 w-9 animate-pulse bg-gray-200 rounded-full" />
-                    ) : session ? (
-                        <DropdownMenu
-                            open={isDropdownOpen}
-                            onOpenChange={setIsDropdownOpen}
-                        >
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    className="relative h-9 w-9 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300"
-                                >
-                                    <Avatar className="h-9 w-9">
-                                        <AvatarImage
-                                            src={session.user?.image || ""}
-                                            alt={session.user?.name || ""}
-                                        />
-                                        <AvatarFallback>
-                                            <User className="h-4 w-4" />
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                                className="w-64"
-                                align="end"
-                                forceMount
-                            >
-                                <DropdownMenuLabel className="font-normal">
-                                    <div className="flex flex-col space-y-1">
-                                        <p className="text-sm font-medium leading-none">
-                                            {session.user?.name}
-                                        </p>
-                                        <p className="text-xs leading-none text-muted-foreground">
-                                            {session.user?.email}
-                                        </p>
-                                        <div className="flex items-center space-x-2 mt-2">
-                                            {getKycStatusIcon()}
-                                            <span
-                                                className={`text-xs font-medium ${getKycStatusColor()}`}
-                                            >
-                                                {getKycStatusText()}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                {!isKycVerified && kycStatus !== "approved" && (
-                                    <DropdownMenuItem asChild>
-                                        <Link
-                                            href="/kyc"
-                                            className="flex items-center"
-                                        >
-                                            <Shield className="mr-2 h-4 w-4" />
-                                            <span>Complete KYC</span>
-                                        </Link>
-                                    </DropdownMenuItem>
-                                )}
-                                {isKycVerified && (
-                                    <DropdownMenuItem asChild>
-                                        <Link
-                                            href="/profile"
-                                            className="flex items-center"
-                                        >
-                                            <User className="mr-2 h-4 w-4" />
-                                            <span>Profile</span>
-                                        </Link>
-                                    </DropdownMenuItem>
-                                )}
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    onClick={handleSignOut}
-                                    className="text-red-600"
-                                >
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Sign out</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    ) : (
-                        <Link href="/auth/signin">
-                            <Button
-                                variant="outline"
-                                className="hidden sm:inline-flex hover:scale-105 transition-transform hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-700"
-                            >
-                                Sign In
-                            </Button>
-                        </Link>
-                    )}
+          {status === "loading" ? (
+            <div className="h-9 w-9 animate-pulse bg-gray-200 rounded-full" />
+          ) : session ? (
+            <DropdownMenu
+              open={isDropdownOpen}
+              onOpenChange={setIsDropdownOpen}
+            >
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-9 w-9 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300"
+                >
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage
+                      src={session.user?.image || ""}
+                      alt={session.user?.name || ""}
+                    />
+                    <AvatarFallback>
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {session.user?.name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {session.user?.email}
+                    </p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      {getKycStatusIcon()}
+                      <span
+                        className={`text-xs font-medium ${getKycStatusColor()}`}
+                      >
+                        {getKycStatusText()}
+                      </span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {!isKycVerified && kycStatus !== "approved" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/kyc" className="flex items-center">
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Complete KYC</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {isKycVerified && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/auth/signin">
+              <Button
+                variant="outline"
+                className="hidden sm:inline-flex hover:scale-105 transition-transform hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-700"
+              >
+                Sign In
+              </Button>
+            </Link>
+          )}
 
-                    <ConnectButton showBalance={false} chainStatus="icon" />
-                </div>
-            </div>
-        </header>
-    );
+          <ConnectButton showBalance={false} chainStatus="icon" />
+        </div>
+      </div>
+    </header>
+  );
 }

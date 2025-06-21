@@ -864,7 +864,7 @@ export const escrowABI = [
   },
 ];
 
-export const escrowAddress = "0x252D7f0cfff5beb27C7305e1b94f148d6842f9C7";
+export const escrowAddress = "0x4c41E3d779bB35114e2776B11410c84FA728a284";
 
 export const validatorABI = [
   {
@@ -1281,7 +1281,7 @@ export const validatorABI = [
   },
 ];
 
-export const validatorAddress = "0xe9Da36C246E0E21fAc8aE716037114757D5b4908";
+export const validatorAddress = "0xF67339fEaEEe4D93673f0Be0342fF1babd8dee52";
 
 export const disputeABI = [
   {
@@ -1591,6 +1591,76 @@ export const disputeABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "getAllActiveDisputesDetails",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "listingId",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "buyer",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "seller",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "imageHash",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "reason",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "createdAt",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "enum DisputeContract.DisputeStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "yesVotes",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "noVotes",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct DisputeContract.DisputeView[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -1791,4 +1861,4 @@ export const disputeABI = [
   },
 ];
 
-export const disputeAddress = "0x9E3e42d00cb2DcE1D0AB95c716427F233d155412";
+export const disputeAddress = "0x28569A5aA623610362f541Ca19f7d6504987548E";
