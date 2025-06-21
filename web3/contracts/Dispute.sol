@@ -180,6 +180,7 @@ contract DisputeContract is Ownable {
         );
     }
 
+
     function hasValidatorVoted(
         uint256 disputeId,
         address validator
