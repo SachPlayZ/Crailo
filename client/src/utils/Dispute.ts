@@ -1,5 +1,5 @@
 import { useWriteContract, useReadContract } from "wagmi";
-import { escrowABI, escrowAddress } from "@/app/abi";
+import { disputeABI, disputeAddress } from "@/app/abi";
 import { Address } from "viem";
 
 export function useCreateDispute() {
@@ -18,8 +18,8 @@ export function useCreateDispute() {
         reason: string;
     }) => {
         return writeContractAsync({
-            address: escrowAddress,
-            abi: escrowABI,
+            address: disputeAddress,
+            abi: disputeABI,
             functionName: "createDispute",
             args: [listingId, buyer, seller, reason],
         });
@@ -40,8 +40,8 @@ export function useVoteOnDispute() {
         productValid: string;
     }) => {
         return writeContractAsync({
-            address: escrowAddress,
-            abi: escrowABI,
+            address: disputeAddress,
+            abi: disputeABI,
             functionName: "voteOnDispute",
             args: [disputeId, productValid],
         });
@@ -52,8 +52,8 @@ export function useVoteOnDispute() {
 
 export function getActiveDisputes() {
     const { data, isLoading, isSuccess, isError, error } = useReadContract({
-        address: escrowAddress,
-        abi: escrowABI,
+        address: disputeAddress,
+        abi: disputeABI,
         functionName: "getActiveDisputes",
         args: [],
     });
@@ -65,8 +65,8 @@ export function getActiveDisputes() {
 export function useDisputeDetails() {
     const getDispute = async (disputeId: string) => {
         return await useReadContract({
-            address: escrowAddress,
-            abi: escrowABI,
+            address: disputeAddress,
+            abi: disputeABI,
             functionName: "getDispute",
             args: [disputeId],
         }).data;
@@ -74,8 +74,8 @@ export function useDisputeDetails() {
 
     const hasValidatorVoted = async (disputeId: string, validator: string) => {
         return await useReadContract({
-            address: escrowAddress,
-            abi: escrowABI,
+            address: disputeAddress,
+            abi: disputeABI,
             functionName: "hasValidatorVoted",
             args: [disputeId, validator],
         }).data;

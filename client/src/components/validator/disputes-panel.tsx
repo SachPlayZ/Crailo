@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Sidebar } from "@/components/validator/sidebar"
 import { Header } from "@/components/validator/header"
 import { DisputeFilters } from "@/components/validator/dispute-filters"
 import { DisputeCard } from "@/components/validator/dispute-card"
+import { getActiveDisputes, useVoteOnDispute } from "@/utils/Dispute"
 
-// Mock data
+// Use the provided mockDisputes
 const mockDisputes = [
     {
         id: "1",
@@ -64,6 +65,8 @@ export default function DisputesPanel() {
     const [activeFilter, setActiveFilter] = useState("all")
     const [disputes, setDisputes] = useState(mockDisputes)
     const [isLoading, setIsLoading] = useState(true)
+    const { data: fetchedDisputes, isLoading: isFetchingLoading, isError, error } = getActiveDisputes();
+    const { voteOnDispute, isPending } = useVoteOnDispute();
 
     useEffect(() => {
         // Simulate loading
@@ -74,12 +77,40 @@ export default function DisputesPanel() {
         return () => clearTimeout(timer)
     }, [])
 
+    useEffect(() => {
+        // If fetchedDisputes is available and non-empty, merge with mockDisputes
+        if (!isFetchingLoading && Array.isArray(fetchedDisputes) && fetchedDisputes.length > 0) {
+            // Merge mockDisputes and fetchedDisputes, avoiding duplicates by id
+            const merged = [
+                ...mockDisputes,
+                ...fetchedDisputes.filter(
+                    (fd: any) => !mockDisputes.some(md => md.id === fd.id)
+                ),
+            ]
+            setDisputes(merged)
+        } else if (!isFetchingLoading) {
+            setDisputes(mockDisputes)
+        }
+    }, [isFetchingLoading, fetchedDisputes])
+
+    const handleVote = async (disputeId: string, productValid: boolean) => {
+        try {
+            await voteOnDispute({
+                disputeId,
+                productValid: productValid ? "true" : "false",
+            });
+            // Optionally refetch disputes here
+        } catch (e) {
+            alert("Vote failed");
+        }
+    };
+
     const filteredDisputes = disputes.filter((dispute) => {
         if (activeFilter === "all") return true
         return dispute.status === activeFilter
     })
 
-    if (isLoading) {
+    if (isLoading || isFetchingLoading) {
         return (
             <div className="flex h-screen bg-slate-950">
                 <Sidebar />
@@ -98,6 +129,10 @@ export default function DisputesPanel() {
                 </div>
             </div>
         )
+    }
+
+    if (isError) {
+        return <div>Error loading disputes: {error?.message}</div>;
     }
 
     return (
