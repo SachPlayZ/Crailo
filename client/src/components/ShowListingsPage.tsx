@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Carousel } from "@/components/ui/carousel";
 import ListItemDialog from "./ListItemDialog";
 import {
   Search,
@@ -223,13 +224,10 @@ const ShowListingsPage = () => {
               >
                 <CardHeader className="pb-4 flex-shrink-0">
                   {listing.images && listing.images.length > 0 && (
-                    <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-lg mb-4 overflow-hidden shadow-inner">
-                      <img 
-                        src={listing.images[0]} 
-                        alt={listing.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <Carousel 
+                      images={listing.images}
+                      className="mb-4"
+                    />
                   )}
 
                   <div className="flex items-start justify-between mb-2">
