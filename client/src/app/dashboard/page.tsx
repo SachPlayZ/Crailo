@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,6 +9,7 @@ import { AlertTriangle, Bell, CheckCircle, Clock, Edit3, Package, ShoppingBag, T
 import Image from "next/image"
 import { useUserHistory } from "@/utils/listing"
 import { useAccount } from "wagmi"
+import { useListing } from "@/utils/listing"
 
 // Array of product images
 const productImages = [
@@ -83,6 +84,35 @@ const myListings = [
         views: 67,
     },
 ]
+
+interface ListingMetadata {
+    title: string;
+    description: string;
+    price: number;
+    location: string;
+    seller: {
+        name: string;
+        address: string;
+    };
+    images: string[];
+    category: string;
+    condition: string;
+    escrowAmount: number;
+}
+
+interface Listing {
+    active: boolean;
+    buyer: string;
+    createdAt: bigint;
+    description: string;
+    id: bigint;
+    imageHash: string;
+    price: bigint;
+    seller: string;
+    sellerStake: bigint;
+    status: number;
+    metadata?: ListingMetadata;
+}
 
 const getStatusBadge = (status: string, type: "buying" | "listing") => {
     const baseClasses = "font-medium backdrop-blur-sm border-0 shadow-lg"
@@ -162,24 +192,81 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
     }
 }
 
+const getStatusFromNumber = (status: number) => {
+    switch (status) {
+        case 0:
+            return "Active";
+        case 1:
+            return "Committed";
+        case 2:
+            return "Completed";
+        case 3:
+            return "Disputed";
+        case 4:
+            return "Cancelled";
+        default:
+            return "Unknown";
+    }
+}
+
+const formatDate = (timestamp: bigint) => {
+    return new Date(Number(timestamp) * 1000).toISOString().split('T')[0];
+}
+
+const formatPrice = (price: bigint) => {
+    return Number(price) / 1e18; // Convert from wei to ETH
+}
+
 export default function CrailoDashboard() {
     const { address } = useAccount()
     const { historyListings, getUserHistoryData } = useUserHistory(address as string)
-    
     const [activeTab, setActiveTab] = useState("buying")
-    const disputeCount =
-        buyingHistory.filter((item) => item.status === "Dispute Raised").length +
-        myListings.filter((item) => item.status === "Under Dispute").length
+    const [listings, setListings] = useState<Listing[]>([])
+
+    useEffect(() => {
+        handleHistoryClick();
+    }, []);
 
     const handleHistoryClick = async () => {
         try {
             const history = await getUserHistoryData();
-            console.log("User history data:", history);
+            if (Array.isArray(history)) {
+                // Fetch metadata for each listing
+                const listingsWithMetadata = await Promise.all(
+                    history.map(async (listing: Listing) => {
+                        try {
+                            const metadataResponse = await fetch(listing.imageHash);
+                            const metadata = await metadataResponse.json();
+                            return { ...listing, metadata };
+                        } catch (error) {
+                            console.error("Error fetching metadata for listing:", error);
+                            return listing;
+                        }
+                    })
+                );
+                setListings(listingsWithMetadata);
+            }
         } catch (error) {
             console.error("Error fetching user history:", error);
         }
     };
 
+    const buyingHistory = listings.filter(item => item.buyer.toLowerCase() === (address as string)?.toLowerCase());
+    const myListings = listings.filter(item => item.seller.toLowerCase() === (address as string)?.toLowerCase());
+
+    const disputeCount = listings.filter(item => item.status === 2).length;
+
+    const { cancelListing } = useListing()
+
+    const removeListing = (id: number) => async () => {
+        try {
+            await cancelListing(id);
+            // Optionally, refetch listings or update state to reflect removal
+            console.log(`Listing ${id} removed successfully`);
+        } catch (error) {
+            console.error("Error removing listing:", error);
+        }
+    }
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
             {/* Animated Background Elements */}
@@ -233,7 +320,7 @@ export default function CrailoDashboard() {
                             <div className="grid gap-6">
                                 {buyingHistory.map((item) => (
                                     <Card
-                                        key={item.id}
+                                        key={Number(item.id)}
                                         className="group hover:scale-[1.02] transition-all duration-500 backdrop-blur-xl bg-gradient-to-r from-gray-800/40 to-gray-700/40 border border-gray-600/50 hover:border-green-400/50 shadow-2xl hover:shadow-green-400/10 rounded-2xl overflow-hidden"
                                     >
                                         <CardContent className="p-6">
@@ -241,8 +328,8 @@ export default function CrailoDashboard() {
                                                 <div className="flex-shrink-0 relative">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                                     <Image
-                                                        src={item.image || "/placeholder.svg"}
-                                                        alt={item.productName}
+                                                        src={item.metadata?.images[0] || "/placeholder.svg"}
+                                                        alt={item.metadata?.title || "Product Image"}
                                                         width={80}
                                                         height={80}
                                                         className="rounded-xl object-cover border border-gray-600/50 relative z-10 group-hover:border-green-400/50 transition-colors duration-300"
@@ -252,31 +339,31 @@ export default function CrailoDashboard() {
                                                     <div className="flex items-start justify-between">
                                                         <div>
                                                             <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-1">
-                                                                {item.productName}
+                                                                {item.metadata?.title || "Untitled Product"}
                                                             </h3>
                                                             <p className="text-sm text-gray-400 mb-2">
-                                                                Sold by: <span className="font-medium text-gray-300">{item.sellerName}</span>
+                                                                Sold by: <span className="font-medium text-gray-300">{item.metadata?.seller.name || "Unknown Seller"}</span>
                                                             </p>
                                                             <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
-                                                                ${item.price}
+                                                                ${formatPrice(item.price)}
                                                             </p>
                                                         </div>
                                                         <div className="text-right">
-                                                            {getStatusBadge(item.status, "buying")}
-                                                            <p className="text-xs text-gray-500 mt-2">Ordered: {item.orderDate}</p>
+                                                            {getStatusBadge(getStatusFromNumber(item.status), "buying")}
+                                                            <p className="text-xs text-gray-500 mt-2">Ordered: {formatDate(item.createdAt)}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex space-x-3 mt-4">
                                                         <Button
                                                             className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-400/25 rounded-xl"
-                                                            disabled={item.status !== "Delivered"}
+                                                            disabled={item.status !== 1}
                                                         >
                                                             Release Escrow
                                                         </Button>
                                                         <Button
                                                             variant="outline"
                                                             className="border border-red-400/50 text-red-400 hover:bg-red-400/10 hover:text-red-300 hover:border-red-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
-                                                            disabled={item.status === "Dispute Raised"}
+                                                            disabled={item.status === 2}
                                                         >
                                                             <AlertTriangle className="w-4 h-4 mr-2" />
                                                             Raise Dispute
@@ -308,7 +395,7 @@ export default function CrailoDashboard() {
                             <div className="grid gap-6">
                                 {myListings.map((item) => (
                                     <Card
-                                        key={item.id}
+                                        key={Number(item.id)}
                                         className="group hover:scale-[1.02] transition-all duration-500 backdrop-blur-xl bg-gradient-to-r from-gray-800/40 to-gray-700/40 border border-gray-600/50 hover:border-green-400/50 shadow-2xl hover:shadow-green-400/10 rounded-2xl overflow-hidden"
                                     >
                                         <CardContent className="p-6">
@@ -316,8 +403,8 @@ export default function CrailoDashboard() {
                                                 <div className="flex-shrink-0 relative">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                                     <Image
-                                                        src={item.image || "/placeholder.svg"}
-                                                        alt={item.title}
+                                                        src={item.metadata?.images[0] || "/placeholder.svg"}
+                                                        alt={item.metadata?.title || "Product Image"}
                                                         width={80}
                                                         height={80}
                                                         className="rounded-xl object-cover border border-gray-600/50 relative z-10 group-hover:border-green-400/50 transition-colors duration-300"
@@ -327,31 +414,23 @@ export default function CrailoDashboard() {
                                                     <div className="flex items-start justify-between">
                                                         <div>
                                                             <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-1">
-                                                                {item.title}
+                                                                {item.metadata?.title || "Untitled Product"}
                                                             </h3>
                                                             <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent mb-2">
-                                                                ${item.price}
+                                                                ${formatPrice(item.price)}
                                                             </p>
-                                                            <p className="text-sm text-gray-400">{item.views} views</p>
                                                         </div>
                                                         <div className="text-right">
-                                                            {getStatusBadge(item.status, "listing")}
-                                                            <p className="text-xs text-gray-500 mt-2">Listed: {item.listedDate}</p>
+                                                            {getStatusBadge(getStatusFromNumber(item.status), "listing")}
+                                                            <p className="text-xs text-gray-500 mt-2">Listed: {formatDate(item.createdAt)}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex space-x-3 mt-4">
                                                         <Button
                                                             variant="outline"
-                                                            className="border border-green-400/50 text-green-400 hover:bg-green-400/10 hover:text-green-300 hover:border-green-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
-                                                            disabled={item.status === "Sold"}
-                                                        >
-                                                            <Edit3 className="w-4 h-4 mr-2" />
-                                                            Update Listing
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
                                                             className="border border-red-400/50 text-red-400 hover:bg-red-400/10 hover:text-red-300 hover:border-red-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
-                                                            disabled={item.status === "Sold"}
+                                                            disabled={item.status >= 1}
+                                                            onClick={removeListing(Number(item.id))}
                                                         >
                                                             <Trash2 className="w-4 h-4 mr-2" />
                                                             Remove Listing
