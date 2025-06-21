@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 interface HeaderProps {
   darkMode: boolean;
@@ -63,12 +64,13 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
               <Moon className="h-4 w-4" />
             )}
           </Button>
-          <Button
+          {/* <Button
             variant="outline"
             className="hidden sm:inline-flex hover:scale-105 transition-transform"
           >
             Connect Wallet
-          </Button>
+          </Button> */}
+          <ConnectButton />
         </div>
       </div>
     </header>

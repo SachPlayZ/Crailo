@@ -30,6 +30,34 @@ import {
   Image as ImageIcon,
   Shield,
 } from "lucide-react";
+import { PinataSDK } from "pinata";
+
+const pinata = new PinataSDK({
+  pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT!,
+  pinataGateway: process.env.NEXT_PUBLIC_PINATA_GATEWAY_URL!,
+});
+
+
+interface IPFSFile {
+  IpfsHash: string;
+  PinSize: number;
+  Timestamp: string;
+}
+
+interface Metadata {
+  title: string;
+  description: string;
+  price: number;
+  location: string;
+  seller: {
+    name: string;
+    address: string;
+  };
+  images: string[];
+  category: string;
+  condition: string;
+  escrowAmount: number;
+}
 
 interface ListItemDialogProps {
   children: React.ReactNode;
@@ -44,6 +72,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
     price: "",
     description: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categories = [
     { id: "electronics", name: "Electronics", icon: "📱" },
@@ -67,14 +96,61 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form data:", { ...formData, images });
-    setOpen(false);
-    // Reset form
-    setFormData({ name: "", category: "", price: "", description: "" });
-    setImages([]);
+    setIsSubmitting(true);
+
+    try {
+      // Upload images to IPFS one by one
+      const imageUrls: string[] = [];
+      
+      for (const image of images) {
+        try {
+          const upload = await pinata.upload.public.file(image);
+          const response = upload as any;
+          const ipfsHash = response.cid || (response.data && response.data.IpfsHash);
+          
+          if (ipfsHash) {
+            imageUrls.push(`https://ipfs.io/ipfs/${ipfsHash}`);
+          }
+        } catch (error) {
+          console.error("Error uploading image:", error);
+        }
+      }
+
+      // Create metadata JSON
+      const metadata: Metadata = {
+        title: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        location: "Not Specified",
+        seller: {
+          name: "Anonymous",
+          address: "0x0000..."
+        },
+        images: imageUrls,
+        category: formData.category,
+        condition: "Not Specified",
+        escrowAmount: parseFloat(formData.price) * 0.1
+      };
+
+      // Upload metadata to IPFS
+      const metadataUpload = await pinata.upload.public.json(metadata);
+      const response2 = metadataUpload as any;
+      const ipfsHash = response2.IpfsHash || (response2.data && response2.data.IpfsHash);
+      
+      console.log("Metadata IPFS Hash:", ipfsHash);
+      console.log("Full metadata:", metadata);
+
+      setOpen(false);
+      // Reset form
+      setFormData({ name: "", category: "", price: "", description: "" });
+      setImages([]);
+    } catch (error) {
+      console.error("Error uploading to IPFS:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -259,9 +335,10 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
             <Button
               type="submit"
               className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0"
+              disabled={isSubmitting}
             >
+              {isSubmitting ? "Listing..." : "Create Listing"}
               <Plus className="w-4 h-4 mr-2" />
-              Create Listing
             </Button>
           </DialogFooter>
         </form>
