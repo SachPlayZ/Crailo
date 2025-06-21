@@ -1,9 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, User, LogOut, Shield, FileText } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  User,
+  LogOut,
+  Shield,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   DropdownMenu,
@@ -24,6 +32,30 @@ interface HeaderProps {
 export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
   const { data: session, status } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [kycStatus, setKycStatus] = useState<string | null>(null);
+  const [isKycVerified, setIsKycVerified] = useState(false);
+
+  // Fetch KYC status when session changes
+  useEffect(() => {
+    const fetchKycStatus = async () => {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch("/api/kyc");
+          if (response.ok) {
+            const data = await response.json();
+            setKycStatus(data.kycStatus);
+            setIsKycVerified(data.isKycVerified);
+          }
+        } catch (error) {
+          console.error("Error fetching KYC status:", error);
+        }
+      }
+    };
+
+    if (session) {
+      fetchKycStatus();
+    }
+  }, [session]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -37,6 +69,42 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" });
+  };
+
+  const getKycStatusIcon = () => {
+    if (isKycVerified || kycStatus === "approved") {
+      return <CheckCircle className="h-4 w-4 text-green-600" />;
+    }
+    if (kycStatus === "pending") {
+      return <Clock className="h-4 w-4 text-yellow-600" />;
+    }
+    return <Shield className="h-4 w-4 text-gray-600" />;
+  };
+
+  const getKycStatusText = () => {
+    if (isKycVerified || kycStatus === "approved") {
+      return "KYC Verified";
+    }
+    if (kycStatus === "pending") {
+      return "KYC Pending";
+    }
+    if (kycStatus === "rejected") {
+      return "KYC Rejected";
+    }
+    return "KYC Required";
+  };
+
+  const getKycStatusColor = () => {
+    if (isKycVerified || kycStatus === "approved") {
+      return "text-green-600";
+    }
+    if (kycStatus === "pending") {
+      return "text-yellow-600";
+    }
+    if (kycStatus === "rejected") {
+      return "text-red-600";
+    }
+    return "text-gray-600";
   };
 
   return (
@@ -140,7 +208,7 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-64" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
@@ -149,21 +217,33 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
                     <p className="text-xs leading-none text-muted-foreground">
                       {session.user?.email}
                     </p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      {getKycStatusIcon()}
+                      <span
+                        className={`text-xs font-medium ${getKycStatusColor()}`}
+                      >
+                        {getKycStatusText()}
+                      </span>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/kyc" className="flex items-center">
-                    <Shield className="mr-2 h-4 w-4" />
-                    <span>KYC Status</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
+                {!isKycVerified && kycStatus !== "approved" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/kyc" className="flex items-center">
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Complete KYC</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {isKycVerified && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}
