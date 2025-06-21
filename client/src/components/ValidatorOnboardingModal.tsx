@@ -22,11 +22,15 @@ export default function ValidatorOnboardingModal({
     const [agreeToTerms, setAgreeToTerms] = useState(false);
     const [walletConnected, setWalletConnected] = useState(false);
     const { stakeAsValidator } = useStakeValidator();
-    const [address,isConnected] = useAccount();
+    const { address, isConnected } = useAccount();
 
     const handleStake = async () => {
+        if (!address) {
+            console.error("Wallet address is undefined.");
+            return;
+        }
         try {
-            await stakeAsValidator( address);
+            await stakeAsValidator(address);
             setWalletConnected(true);
             onClose();
         } catch (e) {
