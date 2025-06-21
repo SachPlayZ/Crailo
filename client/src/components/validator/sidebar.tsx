@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/validator/dashboard?tab=dashboard", icon: Home },
@@ -21,46 +20,50 @@ export function Sidebar() {
   const currentTab = searchParams.get("tab") || "dashboard";
 
   return (
-    <div className="flex h-full w-64 flex-col bg-gray-950 border-r border-gray-800">
+    <div className="flex h-full w-64 flex-col bg-card/80 backdrop-blur-sm border-r border-border/50">
       {/* Logo */}
       <Link href="/">
-        <div className="flex h-16 items-center px-6 border-b border-gray-800">
-          <Image src="/logo.png" alt="Crailo" width={64} height={64} />
+        <div className="flex h-16 items-center px-6 border-b border-border/50">
+          <div className="flex items-center space-x-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">C</span>
+            </div>
+            <span className="text-xl font-bold text-foreground">Crailo</span>
+          </div>
         </div>
       </Link>
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navigation.map((item) => {
-          const Icon = item.icon;
-          const tabInUrl = item.href.split("tab=")[1];
-          const isActive = tabInUrl === currentTab;
+          const isActive = currentTab === item.name.toLowerCase();
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group",
-                isActive
-                  ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
-              )}
-            >
-              <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
-              {item.name}
+            <Link key={item.name} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-left h-12 px-4 rounded-lg transition-all duration-200",
+                  isActive
+                    ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/25"
+                    : "text-muted-foreground hover:text-foreground hover:bg-green-50 dark:hover:bg-green-900/20"
+                )}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
+                {item.name}
+              </Button>
             </Link>
           );
         })}
       </nav>
 
-      {/* Exit Position Button */}
-      <div className="p-4 border-t border-gray-800">
+      {/* Footer */}
+      <div className="p-4 border-t border-border/50">
         <Button
-          variant="destructive"
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
+          variant="ghost"
+          className="w-full justify-start text-left h-12 px-4 rounded-lg text-muted-foreground hover:text-foreground hover:bg-red-50 dark:hover:bg-red-950"
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Exit Position
+          <LogOut className="w-5 h-5 mr-3" />
+          Sign Out
         </Button>
       </div>
     </div>
