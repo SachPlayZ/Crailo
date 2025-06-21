@@ -31,13 +31,13 @@ export const useListing = () => {
         imageHash,
         price,
       });
-      const toStake = parseFloat(price) * 0.1; // 10% of the price as stake
+      const toStake = parseFloat(price) * 0.1;
       const tx = await writeContractAsync({
         address: escrowAddress,
         abi: escrowABI,
         functionName: "createListing",
         args: [description, imageHash, parseEther(price)],
-        value: parseEther(toStake.toString()), // Send 10% of the price as stake
+        value: parseEther(toStake.toString()),
       });
 
       if (tx) {
@@ -78,7 +78,7 @@ export const useListing = () => {
         abi: escrowABI,
         functionName: "commitToBuy",
         args: [listingId],
-        value: parseEther(price), // Send the full price as stake
+        value: parseEther(price),
       });
 
       if (tx) {

@@ -205,6 +205,8 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
     }
   }
 };
+  }
+};
 
 const getStatusFromNumber = (status: number) => {
   switch (status) {
@@ -239,6 +241,9 @@ export default function CrailoDashboard() {
   const [activeTab, setActiveTab] = useState("buying");
   const [listings, setListings] = useState<Listing[]>([]);
 
+  useEffect(() => {
+    handleHistoryClick();
+  }, []);
   useEffect(() => {
     handleHistoryClick();
   }, []);
