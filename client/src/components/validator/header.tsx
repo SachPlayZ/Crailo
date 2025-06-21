@@ -13,11 +13,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/ThemeProvider";
 
 export function Header() {
   const { isConnected } = useAccount();
-  const { theme, setTheme } = useTheme();
+  const { darkMode, toggleDarkMode } = useTheme();
 
   return (
     <header className="h-16 bg-card/80 backdrop-blur-sm border-b border-border/50 flex items-center justify-between px-6">
@@ -39,10 +39,10 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          onClick={toggleDarkMode}
           className="h-9 w-9 hover:scale-110 transition-transform hover:bg-green-50 dark:hover:bg-green-900/20"
         >
-          {theme === "dark" ? (
+          {darkMode ? (
             <Sun className="h-4 w-4" />
           ) : (
             <Moon className="h-4 w-4" />
