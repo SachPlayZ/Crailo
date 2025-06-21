@@ -192,6 +192,7 @@ contract MainEscrow is Ownable {
 
     function createDispute(
         uint256 listingId,
+        string memory imageHash,
         string memory reason
     ) external onlyListingBuyer(listingId) {
         Listing storage listing = listings[listingId];
@@ -205,6 +206,7 @@ contract MainEscrow is Ownable {
         disputeContract.createDispute(
             listingId,
             msg.sender,
+            imageHash,
             listing.seller,
             reason
         );
@@ -368,5 +370,33 @@ contract MainEscrow is Ownable {
             history[i] = listings[ids[i]];
         }
         return history;
+    }
+
+    /**
+     * @dev Returns all listings created by a particular seller address
+     * @param seller The address to query
+     * @return Array of Listing structs listed by the seller
+     */
+    function getSellerHistory(
+        address seller
+    ) external view returns (Listing[] memory) {
+        // Count how many listings this seller has created
+        uint256 count = 0;
+        for (uint256 i = 1; i <= listingCounter; i++) {
+            if (listings[i].seller == seller) {
+                count++;
+            }
+        }
+
+        // Create array with exact size
+        Listing[] memory sellerListings = new Listing[](count);
+        uint256 idx = 0;
+        for (uint256 i = 1; i <= listingCounter; i++) {
+            if (listings[i].seller == seller) {
+                sellerListings[idx] = listings[i];
+                idx++;
+            }
+        }
+        return sellerListings;
     }
 }

@@ -13,6 +13,7 @@ contract DisputeContract is Ownable {
         uint256 listingId;
         address buyer;
         address seller;
+        string imageHash;
         string reason;
         uint256 createdAt;
         uint256 deadline;
@@ -63,6 +64,7 @@ contract DisputeContract is Ownable {
     function createDispute(
         uint256 listingId,
         address buyer,
+        string memory imageHash,
         address seller,
         string memory reason
     ) external returns (uint256) {
@@ -73,6 +75,7 @@ contract DisputeContract is Ownable {
         dispute.listingId = listingId;
         dispute.buyer = buyer;
         dispute.seller = seller;
+        dispute.imageHash = imageHash;
         dispute.reason = reason;
         dispute.createdAt = block.timestamp;
         dispute.deadline = block.timestamp + disputeDuration;
@@ -179,7 +182,6 @@ contract DisputeContract is Ownable {
             dispute.deadline
         );
     }
-
 
     function hasValidatorVoted(
         uint256 disputeId,

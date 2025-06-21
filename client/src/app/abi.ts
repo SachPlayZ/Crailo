@@ -242,6 +242,11 @@ export const escrowABI = [
       },
       {
         internalType: "string",
+        name: "imageHash",
+        type: "string",
+      },
+      {
+        internalType: "string",
         name: "reason",
         type: "string",
       },
@@ -428,6 +433,148 @@ export const escrowABI = [
   {
     inputs: [],
     name: "getListings",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "seller",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "imageHash",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "price",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "active",
+            type: "bool",
+          },
+          {
+            internalType: "address",
+            name: "buyer",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "sellerStake",
+            type: "uint256",
+          },
+          {
+            internalType: "enum MainEscrow.ListingStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "createdAt",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct MainEscrow.Listing[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "seller",
+        type: "address",
+      },
+    ],
+    name: "getSellerHistory",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "seller",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "imageHash",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "price",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "active",
+            type: "bool",
+          },
+          {
+            internalType: "address",
+            name: "buyer",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "sellerStake",
+            type: "uint256",
+          },
+          {
+            internalType: "enum MainEscrow.ListingStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "createdAt",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct MainEscrow.Listing[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "getUserHistory",
     outputs: [
       {
         components: [
@@ -717,7 +864,7 @@ export const escrowABI = [
   },
 ];
 
-export const escrowAddress = "0xe25A57de98715BC33fee505aa4FC49BA68B24FC3";
+export const escrowAddress = "0x252D7f0cfff5beb27C7305e1b94f148d6842f9C7";
 
 export const validatorABI = [
   {
@@ -1134,7 +1281,7 @@ export const validatorABI = [
   },
 ];
 
-export const validatorAddress = "0x9aE032C173c9c370235d1036AA30cA6ce75Cc866";
+export const validatorAddress = "0xe9Da36C246E0E21fAc8aE716037114757D5b4908";
 
 export const disputeABI = [
   {
@@ -1309,6 +1456,11 @@ export const disputeABI = [
         type: "address",
       },
       {
+        internalType: "string",
+        name: "imageHash",
+        type: "string",
+      },
+      {
         internalType: "address",
         name: "seller",
         type: "address",
@@ -1385,6 +1537,11 @@ export const disputeABI = [
         internalType: "address",
         name: "seller",
         type: "address",
+      },
+      {
+        internalType: "string",
+        name: "imageHash",
+        type: "string",
       },
       {
         internalType: "string",
@@ -1634,4 +1791,4 @@ export const disputeABI = [
   },
 ];
 
-export const disputeAddress = "0xC366f1F13310Aeb1328afe15EB4DCdc4A38f0280";
+export const disputeAddress = "0x9E3e42d00cb2DcE1D0AB95c716427F233d155412";
