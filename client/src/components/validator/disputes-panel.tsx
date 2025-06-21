@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Sidebar } from "@/components/validator/sidebar"
-import { Header } from "@/components/validator/header"
-import { DisputeFilters } from "@/components/validator/dispute-filters"
-import { DisputeCard } from "@/components/validator/dispute-card"
+import React, { useState, useEffect } from "react";
+import { Sidebar } from "@/components/validator/sidebar";
+import { Header } from "@/components/validator/header";
+import { DisputeFilters } from "@/components/validator/dispute-filters";
+import { DisputeCard } from "@/components/validator/dispute-card";
+import { getActiveDisputes, useVoteOnDispute } from "@/utils/Dispute";
 
-// Mock data
+// Use the provided mockDisputes
 const mockDisputes = [
     {
         id: "1",
@@ -16,7 +17,8 @@ const mockDisputes = [
         buyerAddress: "0x5e6f...7g8h",
         originalImage: "/placeholder.svg?height=128&width=128",
         receivedImage: "/placeholder.svg?height=128&width=128",
-        descriptionMismatch: "Product received appears to be a replica, not authentic vintage Rolex as described.",
+        descriptionMismatch:
+            "Product received appears to be a replica, not authentic vintage Rolex as described.",
         timeAgo: "3h ago",
         status: "pending" as const,
     },
@@ -28,7 +30,8 @@ const mockDisputes = [
         buyerAddress: "0x3m4n...5o6p",
         originalImage: "/placeholder.svg?height=128&width=128",
         receivedImage: "/placeholder.svg?height=128&width=128",
-        descriptionMismatch: "Size mismatch - received US 9 instead of advertised US 10.5.",
+        descriptionMismatch:
+            "Size mismatch - received US 9 instead of advertised US 10.5.",
         timeAgo: "5h ago",
         status: "pending" as const,
     },
@@ -58,28 +61,67 @@ const mockDisputes = [
         timeAgo: "2d ago",
         status: "resolved" as const,
     },
-]
+];
 
 export default function DisputesPanel() {
-    const [activeFilter, setActiveFilter] = useState("all")
-    const [disputes, setDisputes] = useState(mockDisputes)
-    const [isLoading, setIsLoading] = useState(true)
+    const [activeFilter, setActiveFilter] = useState("all");
+    const [disputes, setDisputes] = useState(mockDisputes);
+    const [isLoading, setIsLoading] = useState(true);
+    const {
+        data: fetchedDisputes,
+        isLoading: isFetchingLoading,
+        isError,
+        error,
+    } = getActiveDisputes();
+    const { voteOnDispute, isPending } = useVoteOnDispute();
 
     useEffect(() => {
         // Simulate loading
         const timer = setTimeout(() => {
-            setIsLoading(false)
-        }, 1000)
+            setIsLoading(false);
+        }, 1000);
 
-        return () => clearTimeout(timer)
-    }, [])
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        // If fetchedDisputes is available and non-empty, merge with mockDisputes
+        if (
+            !isFetchingLoading &&
+            Array.isArray(fetchedDisputes) &&
+            fetchedDisputes.length > 0
+        ) {
+            // Merge mockDisputes and fetchedDisputes, avoiding duplicates by id
+            const merged = [
+                ...mockDisputes,
+                ...fetchedDisputes.filter(
+                    (fd: any) => !mockDisputes.some((md) => md.id === fd.id)
+                ),
+            ];
+            setDisputes(merged);
+        } else if (!isFetchingLoading) {
+            setDisputes(mockDisputes);
+        }
+    }, [isFetchingLoading, fetchedDisputes]);
+
+    const handleVote = async (disputeId: string, productValid: boolean) => {
+        try {
+            await voteOnDispute({
+                disputeId,
+                productValid: productValid ? "true" : "false",
+            });
+            // Optionally refetch disputes here
+        } catch (e) {
+            alert("Vote failed");
+        }
+    };
 
     const filteredDisputes = disputes.filter((dispute) => {
-        if (activeFilter === "all") return true
-        return dispute.status === activeFilter
-    })
+        if (activeFilter === "all") return true;
+        return dispute.status === activeFilter;
+    });
 
-    if (isLoading) {
+    if (isLoading || isFetchingLoading) {
         return (
             <div className="flex h-screen bg-slate-950">
                 <Sidebar />
@@ -90,14 +132,21 @@ export default function DisputesPanel() {
                             <div className="h-12 bg-slate-800/50 rounded-lg animate-pulse" />
                             <div className="grid gap-6">
                                 {[...Array(3)].map((_, i) => (
-                                    <div key={i} className="h-96 bg-slate-800/50 rounded-lg animate-pulse" />
+                                    <div
+                                        key={i}
+                                        className="h-96 bg-slate-800/50 rounded-lg animate-pulse"
+                                    />
                                 ))}
                             </div>
                         </div>
                     </main>
                 </div>
             </div>
-        )
+        );
+    }
+
+    if (isError) {
+        return <div>Error loading disputes: {error?.message}</div>;
     }
 
     return (
@@ -114,9 +163,13 @@ export default function DisputesPanel() {
                 <main className="flex-1 overflow-y-auto p-6 space-y-6">
                     {/* Filters */}
                     <div className="flex items-center justify-between">
-                        <DisputeFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+                        <DisputeFilters
+                            activeFilter={activeFilter}
+                            onFilterChange={setActiveFilter}
+                        />
                         <div className="text-sm text-slate-400">
-                            Showing {filteredDisputes.length} dispute{filteredDisputes.length !== 1 ? "s" : ""}
+                            Showing {filteredDisputes.length} dispute
+                            {filteredDisputes.length !== 1 ? "s" : ""}
                         </div>
                     </div>
 
@@ -135,12 +188,16 @@ export default function DisputesPanel() {
 
                     {filteredDisputes.length === 0 && (
                         <div className="text-center py-12">
-                            <div className="text-slate-400 text-lg mb-2">No disputes found</div>
-                            <div className="text-slate-500 text-sm">Try adjusting your filters or check back later.</div>
+                            <div className="text-slate-400 text-lg mb-2">
+                                No disputes found
+                            </div>
+                            <div className="text-slate-500 text-sm">
+                                Try adjusting your filters or check back later.
+                            </div>
                         </div>
                     )}
                 </main>
             </div>
         </div>
-    )
+    );
 }
