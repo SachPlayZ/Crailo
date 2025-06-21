@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel } from "@/components/ui/carousel";
+import { useListing } from "@/utils/listing";
 
 interface CustomModalProps {
   isOpen: boolean;
@@ -42,6 +43,15 @@ const CustomModal: React.FC<CustomModalProps> = ({
   listing,
   onConfirmDeposit,
 }) => {
+  const { commitToBuy } = useListing();
+
+  const handleDeposit = () => {
+    commitToBuy(Number(listing.id), listing.price.toString());
+    console.log("depositing");
+    console.log("listing", listing);
+    onConfirmDeposit();
+  };
+
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -77,7 +87,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
       />
 
       {/* Modal */}
-      <div className="relative w-[80vw] max-h-[90vh] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-green-200 dark:border-green-800 overflow-hidden">
+      <div className="relative w-[80vw] max-h-[90vh] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-green-200 dark:border-green-800 overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-green-200 dark:border-green-800 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50">
           <div className="flex-1">
@@ -216,10 +226,10 @@ const CustomModal: React.FC<CustomModalProps> = ({
               Cancel
             </Button>
             <Button
-              onClick={onConfirmDeposit}
+              onClick={handleDeposit}
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 px-8 py-3 text-lg font-semibold shadow-lg shadow-green-500/10 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
-              Send Deposit - {listing.price.toFixed(2)} CORE
+              Send Deposit - {listing.price.toFixed(5)} CORE
             </Button>
           </div>
         </div>

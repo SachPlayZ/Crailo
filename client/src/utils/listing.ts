@@ -70,7 +70,7 @@ export const useListing = () => {
     }
   };
 
-  const commitToBuy = async (listingId: number) => {
+  const commitToBuy = async (listingId: number, price: string) => {
     try {
       console.log("Buyer staking for objectId:", listingId);
       const tx = await writeContractAsync({
@@ -78,6 +78,7 @@ export const useListing = () => {
         abi: escrowABI,
         functionName: "commitToBuy",
         args: [listingId],
+        value: parseEther(price), // Send the full price as stake
       });
 
       if (tx) {
@@ -139,7 +140,7 @@ export const useListing = () => {
   };
 };
 
-export const useUserHistory = async (userAddress: string) => {
+export const useUserHistory = (userAddress: string) => {
   const {
     data,
     isLoading,
@@ -152,9 +153,25 @@ export const useUserHistory = async (userAddress: string) => {
     args: [userAddress],
   });
 
+  const getUserHistoryData = async () => {
+    try {
+      console.log("Getting user history for address:", userAddress);
+      const result = await refetchUserHistory();
+      if (result.data) {
+        console.log("User history fetched successfully:", result.data);
+        return result.data;
+      }
+      return data || [];
+    } catch (error) {
+      console.error("Failed to fetch user history:", error);
+      throw error;
+    }
+  };
+
   return {
     historyListings: data,
     isLoading,
     refetchUserHistory,
+    getUserHistoryData,
   };
 };
