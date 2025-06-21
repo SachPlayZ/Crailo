@@ -17,6 +17,7 @@ export default function AuthGuard({
   const { data: session, status } = useSession();
   const router = useRouter();
   const [kycStatus, setKycStatus] = useState<string | null>(null);
+  const [isKycVerified, setIsKycVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function AuthGuard({
           if (response.ok) {
             const data = await response.json();
             setKycStatus(data.kycStatus);
+            setIsKycVerified(data.isKycVerified);
           }
         } catch (error) {
           console.error("Error checking KYC status:", error);
@@ -51,22 +53,28 @@ export default function AuthGuard({
 
   useEffect(() => {
     if (!loading && session && requireKyc) {
-      if (kycStatus === "not_submitted") {
-        router.push("/kyc");
-        return;
+      if (isKycVerified || kycStatus === "approved") {
+        if (window.location.pathname === "/kyc") {
+          router.push("/");
+          return;
+        }
       }
 
-      if (kycStatus === "rejected") {
-        router.push("/kyc");
-        return;
+      if (kycStatus === "not_submitted" || kycStatus === "rejected") {
+        if (window.location.pathname !== "/kyc") {
+          router.push("/kyc");
+          return;
+        }
       }
 
-      if (kycStatus !== "approved" && !session.user?.isKycVerified) {
-        router.push("/kyc");
-        return;
+      if (kycStatus === "pending") {
+        if (window.location.pathname !== "/kyc/pending") {
+          router.push("/kyc/pending");
+          return;
+        }
       }
     }
-  }, [kycStatus, loading, session, router, requireKyc]);
+  }, [kycStatus, isKycVerified, loading, session, router, requireKyc]);
 
   if (status === "loading" || loading) {
     return (
@@ -83,7 +91,7 @@ export default function AuthGuard({
     return null;
   }
 
-  if (requireKyc && kycStatus !== "approved" && !session?.user?.isKycVerified) {
+  if (requireKyc && !isKycVerified && kycStatus !== "approved") {
     return null;
   }
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,9 +31,49 @@ type KYCFormData = z.infer<typeof kycSchema>;
 
 export default function KYCPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [kycStatus, setKycStatus] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check KYC status on component mount
+  useEffect(() => {
+    const checkKycStatus = async () => {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch("/api/kyc");
+          if (response.ok) {
+            const data = await response.json();
+            setKycStatus(data.kycStatus);
+
+            // Redirect if already KYC verified
+            if (data.isKycVerified || data.kycStatus === "approved") {
+              router.push("/");
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("Error checking KYC status:", error);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    if (status === "loading") return;
+
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+      return;
+    }
+
+    if (session) {
+      checkKycStatus();
+    } else {
+      setIsLoading(false);
+    }
+  }, [session, status, router]);
 
   const {
     register,
@@ -72,6 +113,29 @@ export default function KYCPage() {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading state while checking KYC status
+  if (isLoading || status === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8">
+        <div className="container mx-auto px-4">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+              </div>
+              <CardTitle className="text-2xl font-bold">
+                Checking KYC Status...
+              </CardTitle>
+              <CardDescription>
+                Please wait while we verify your KYC status
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (
