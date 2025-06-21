@@ -33,6 +33,8 @@ import {
   Trash2,
   TruckIcon,
   Upload,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -479,19 +481,38 @@ export default function CrailoDashboard() {
           </DialogContent>
         </Dialog>
 
-        <div className="mb-8">
-          <h2 className="text-4xl font-bold text-foreground mb-2">
-            My Dashboard
-          </h2>
-          <Button
-            onClick={handleHistoryClick}
-            className="mb-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
-          >
-            Get History
-          </Button>
-          <p className="text-muted-foreground text-lg">
-            Manage your purchases and listings on Crailo
-          </p>
+        <div className="relative z-10 bg-card/80 backdrop-blur-sm border-b border-border/50 mb-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+              <div className="space-y-2">
+                <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
+                  My Dashboard
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  Manage your purchases and listings on Crailo
+                </p>
+              </div>
+
+              <Button
+                onClick={handleHistoryClick}
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 px-8 py-3 relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                Refresh History
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                {/* Enhanced animated border trail */}
+                <div className="absolute inset-0 rounded-lg border-2 border-transparent">
+                  <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500"></div>
+                  </div>
+                </div>
+                {/* Enhanced trail effect */}
+                <div className="absolute -inset-2 bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity duration-500"></div>
+                {/* Additional glow effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-green-300 via-emerald-300 to-green-300 rounded-lg blur-sm opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+              </Button>
+            </div>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
