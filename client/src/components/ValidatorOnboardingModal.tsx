@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +51,9 @@ export default function ValidatorOnboardingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogTitle className="text-2xl font-bold text-center">
+        Validator Onboarding
+      </DialogTitle>
       <DialogContent
         className="max-w-2xl w-full p-0 border-none bg-black/90 rounded-3xl shadow-2xl transition-all duration-300"
         style={{
