@@ -8,6 +8,7 @@ import {
   Clock,
   MapPin,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,13 +44,17 @@ const CustomModal: React.FC<CustomModalProps> = ({
   listing,
   onConfirmDeposit,
 }) => {
-  const { commitToBuy } = useListing();
+  const { commitToBuy, isWritePending: isCommitToBuyPending } = useListing();
 
-  const handleDeposit = () => {
-    commitToBuy(Number(listing.id), listing.price.toString());
-    console.log("depositing");
-    console.log("listing", listing);
-    onConfirmDeposit();
+  const handleDeposit = async () => {
+    try {
+      await commitToBuy(Number(listing.id), listing.price.toString());
+      console.log("depositing");
+      console.log("listing", listing);
+      onConfirmDeposit();
+    } catch (error) {
+      console.error("Error committing to buy:", error);
+    }
   };
 
   // Handle escape key
@@ -218,15 +223,22 @@ const CustomModal: React.FC<CustomModalProps> = ({
             <Button
               variant="outline"
               onClick={onClose}
+              disabled={isCommitToBuyPending}
               className="border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-900/50 px-6 py-3"
             >
               Cancel
             </Button>
             <Button
               onClick={handleDeposit}
-              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 px-8 py-3 text-lg font-semibold shadow-lg shadow-green-500/10 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              disabled={isCommitToBuyPending}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 px-8 py-3 text-lg font-semibold shadow-lg shadow-green-500/10 hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Send Deposit - {listing.price.toFixed(5)} CORE
+              {isCommitToBuyPending && (
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              )}
+              {isCommitToBuyPending
+                ? "Processing..."
+                : `Send Deposit - ${listing.price.toFixed(5)} CORE`}
             </Button>
           </div>
         </div>

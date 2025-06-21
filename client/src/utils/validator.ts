@@ -3,7 +3,7 @@ import { parseEther } from "viem";
 import { useReadContract, useWriteContract } from "wagmi";
 
 export const useValidatorAdd = () => {
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, isPending } = useWriteContract();
 
   const addValidator = async (userAddress: `0x${string}`) => {
     try {
@@ -25,11 +25,11 @@ export const useValidatorAdd = () => {
     }
   };
 
-  return { addValidator };
+  return { addValidator, isPending };
 };
 
 export const useValidatorRemove = () => {
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, isPending } = useWriteContract();
 
   const removeValidator = async (userAddress: `0x${string}`) => {
     try {
@@ -51,11 +51,11 @@ export const useValidatorRemove = () => {
     }
   };
 
-  return { removeValidator };
+  return { removeValidator, isPending };
 };
 
 export const useStakeValidator = () => {
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, isPending } = useWriteContract();
 
   const stakeAsValidator = async () => {
     try {
@@ -96,11 +96,11 @@ export const useStakeValidator = () => {
     }
   };
 
-  return { stakeAsValidator, unstakeValidator };
+  return { stakeAsValidator, unstakeValidator, isPending };
 };
 
 export const useValidatorGet = (userAddress: string) => {
-  const { data: validatorInfo, refetch: refetchValidatorInfo } =
+  const { data: validatorInfo, refetch: refetchValidatorInfo, isLoading } =
     useReadContract({
       address: validatorAddress,
       abi: validatorABI,
@@ -111,5 +111,6 @@ export const useValidatorGet = (userAddress: string) => {
   return {
     validatorInfo,
     refetchValidatorInfo,
+    isLoading,
   };
 };

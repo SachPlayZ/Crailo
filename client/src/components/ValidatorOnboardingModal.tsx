@@ -20,9 +20,8 @@ export default function ValidatorOnboardingModal({
   onClose,
 }: ValidatorOnboardingModalProps) {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [isStaking, setIsStaking] = useState(false);
   const [stakeCompleted, setStakeCompleted] = useState(false);
-  const { stakeAsValidator } = useStakeValidator();
+  const { stakeAsValidator, isPending: isStakePending } = useStakeValidator();
   const { address, isConnected } = useAccount();
 
   const handleStake = async () => {
@@ -31,7 +30,6 @@ export default function ValidatorOnboardingModal({
       return;
     }
 
-    setIsStaking(true);
     try {
       await stakeAsValidator();
       setStakeCompleted(true);
@@ -40,12 +38,10 @@ export default function ValidatorOnboardingModal({
         onClose();
         // Reset state for next time
         setStakeCompleted(false);
-        setIsStaking(false);
         setAgreeToTerms(false);
       }, 2000);
     } catch (e) {
       console.error(e);
-      setIsStaking(false);
     }
   };
 
@@ -70,7 +66,7 @@ export default function ValidatorOnboardingModal({
             nextButtonProps={{
               className:
                 "bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-all shadow-none mt-6",
-              disabled: !agreeToTerms || !isConnected || isStaking,
+              disabled: !agreeToTerms || !isConnected || isStakePending,
             }}
             backButtonProps={{
               className:
@@ -78,7 +74,7 @@ export default function ValidatorOnboardingModal({
             }}
             contentClassName="bg-transparent"
             footerClassName="bg-transparent"
-            nextButtonText={isStaking ? "Processing..." : "Complete"}
+            nextButtonText={isStakePending ? "Processing..." : "Complete"}
             backButtonText="Back"
           >
             {/* Step 1: Disclaimer & Terms */}
