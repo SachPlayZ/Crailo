@@ -339,7 +339,7 @@ export default function CrailoDashboard() {
 
       // Create the dispute with the IPFS hash of the JSON
       await createDispute({
-        listingId: Number(selectedListing.id),
+        listingId: selectedListing.id.toString(),
         buyer: address as string,
         seller: selectedListing.seller,
         reason: values.reason,
