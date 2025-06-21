@@ -34,11 +34,7 @@ export const useListing = () => {
         address: escrowAddress,
         abi: escrowABI,
         functionName: "createListing",
-        args: [
-          description,
-          imageHash,
-          parseEther(price),
-        ],
+        args: [description, imageHash, parseEther(price)],
         value: parseEther(price),
       });
 
@@ -124,7 +120,6 @@ export const useListing = () => {
         return result.data;
       }
 
-      // Return current data if refetch didn't return new data
       return listings || [];
     } catch (error) {
       console.error("Failed to fetch listings:", error);
