@@ -17,7 +17,7 @@ contract ValidatorContract is Ownable {
     }
 
     // Configuration constants - updatable
-    uint256 public minValidatorStake = 1 ether;
+    uint256 public minValidatorStake = 1 wei;
     uint256 public validatorReward = 100 * 10 ** 18;
 
     mapping(address => Validator) public validators;
