@@ -120,3 +120,35 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .crailo-gradient {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  }
+  
+  .crailo-gradient-light {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  }
+  
+  .crailo-text-gradient {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+}
