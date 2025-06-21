@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/validator/dashboard?tab=dashboard", icon: Home },
@@ -24,12 +25,7 @@ export function Sidebar() {
       {/* Logo */}
       <Link href="/">
         <div className="flex h-16 items-center px-6 border-b border-gray-800">
-          <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            <span className="text-xl font-bold text-white">Crailo</span>
-          </div>
+          <Image src="/logo.png" alt="Crailo" width={64} height={64} />
         </div>
       </Link>
 

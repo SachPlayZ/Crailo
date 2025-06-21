@@ -206,9 +206,6 @@ const CustomModal: React.FC<CustomModalProps> = ({
                   <p className="font-medium text-foreground">
                     {listing.seller.name}
                   </p>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {listing.seller.address}
-                  </p>
                 </div>
               </div>
             </div>
