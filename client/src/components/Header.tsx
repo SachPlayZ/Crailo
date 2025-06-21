@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Moon,
@@ -23,6 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   darkMode: boolean;
@@ -34,6 +37,7 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [kycStatus, setKycStatus] = useState<string | null>(null);
   const [isKycVerified, setIsKycVerified] = useState(false);
+  const pathname = usePathname();
 
   // Fetch KYC status when session changes
   useEffect(() => {
@@ -109,74 +113,153 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center space-x-2 group">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="h-8 w-8 rounded-lg bg-green-600 flex items-center justify-center transition-transform group-hover:scale-110">
-              <span className="text-white font-bold text-sm">C</span>
+      <div className="max-w-7xl mx-auto grid grid-cols-12 h-16 items-center px-4 sm:px-6 lg:px-8">
+        {/* Logo - Column 1 */}
+        <div className="col-start-1 col-span-2">
+          <Link href="/" className="flex items-center group">
+            <div className="h-16 w-24 transition-transform group-hover:scale-110 relative">
+              <div className="absolute inset-0 bg-green-400/20 rounded-lg blur-xl transition-all duration-300"></div>
+              <Image
+                src="/logo.png"
+                alt="Crailo"
+                width={64}
+                height={64}
+                className="h-full w-full object-contain relative z-10 drop-shadow-lg"
+              />
             </div>
-            <span className="text-xl font-bold">Crailo</span>
           </Link>
         </div>
 
-        <nav className="hidden md:flex items-center space-x-6">
+        {/* Centered Navigation - Columns 3-10 */}
+        <nav className="col-start-3 col-span-8 hidden md:flex items-center justify-center space-x-8">
           {!session ? (
             <>
               <button
                 onClick={() => scrollToSection("how-it-works")}
-                className="text-sm font-medium hover:text-green-600 transition-colors relative group"
+                className={cn(
+                  "text-sm font-medium hover:text-green-600 transition-all duration-300 relative group px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20",
+                  pathname === "/" &&
+                    "text-green-600 bg-green-50 dark:bg-green-900/20"
+                )}
               >
                 How It Works
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full",
+                    pathname === "/" && "w-full"
+                  )}
+                ></span>
               </button>
               <button
                 onClick={() => scrollToSection("why-crailo")}
-                className="text-sm font-medium hover:text-green-600 transition-colors relative group"
+                className={cn(
+                  "text-sm font-medium hover:text-green-600 transition-all duration-300 relative group px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20",
+                  pathname === "/" &&
+                    "text-green-600 bg-green-50 dark:bg-green-900/20"
+                )}
               >
                 Why Crailo
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full",
+                    pathname === "/" && "w-full"
+                  )}
+                ></span>
               </button>
               <button
                 onClick={() => scrollToSection("validators")}
-                className="text-sm font-medium hover:text-green-600 transition-colors relative group"
+                className={cn(
+                  "text-sm font-medium hover:text-green-600 transition-all duration-300 relative group px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20",
+                  pathname === "/" &&
+                    "text-green-600 bg-green-50 dark:bg-green-900/20"
+                )}
               >
                 Validators
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full",
+                    pathname === "/" && "w-full"
+                  )}
+                ></span>
               </button>
               <button
                 onClick={() => scrollToSection("community")}
-                className="text-sm font-medium hover:text-green-600 transition-colors relative group"
+                className={cn(
+                  "text-sm font-medium hover:text-green-600 transition-all duration-300 relative group px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20",
+                  pathname === "/" &&
+                    "text-green-600 bg-green-50 dark:bg-green-900/20"
+                )}
               >
                 Community
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full",
+                    pathname === "/" && "w-full"
+                  )}
+                ></span>
               </button>
             </>
           ) : (
             <>
               <Link
                 href="/listings"
-                className="text-sm font-medium hover:text-green-600 transition-colors relative group"
+                className={cn(
+                  "text-sm font-medium hover:text-green-600 transition-all duration-300 relative group px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20",
+                  pathname === "/listings" &&
+                    "text-green-600 bg-green-50 dark:bg-green-900/20"
+                )}
               >
                 Listings
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full",
+                    pathname === "/listings" && "w-full"
+                  )}
+                ></span>
+              </Link>
+              <Link
+                href="/dashboard"
+                className={cn(
+                  "text-sm font-medium hover:text-green-600 transition-all duration-300 relative group px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20",
+                  pathname === "/dashboard" &&
+                    "text-green-600 bg-green-50 dark:bg-green-900/20"
+                )}
+              >
+                Dashboard
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full",
+                    pathname === "/dashboard" && "w-full"
+                  )}
+                ></span>
               </Link>
               <Link
                 href="/validator/dashboard"
-                className="text-sm font-medium hover:text-green-600 transition-colors relative group"
+                className={cn(
+                  "text-sm font-medium hover:text-green-600 transition-all duration-300 relative group px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20",
+                  pathname.startsWith("/validator") &&
+                    "text-green-600 bg-green-50 dark:bg-green-900/20"
+                )}
               >
-                Validator Dashboard
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
+                Validator
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full",
+                    pathname.startsWith("/validator") && "w-full"
+                  )}
+                ></span>
               </Link>
             </>
           )}
         </nav>
 
-        <div className="flex items-center space-x-4">
+        {/* Right side controls - Columns 11-12 */}
+        <div className="col-start-11 col-span-2 flex items-center justify-end space-x-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleDarkMode}
-            className="h-9 w-9 hover:scale-110 transition-transform"
+            className="h-9 w-9 hover:scale-110 transition-transform hover:bg-green-50 dark:hover:bg-green-900/20"
           >
             {darkMode ? (
               <Sun className="h-4 w-4" />
@@ -195,7 +278,7 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-9 w-9 rounded-full"
+                  className="relative h-9 w-9 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300"
                 >
                   <Avatar className="h-9 w-9">
                     <AvatarImage
@@ -258,14 +341,14 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
             <Link href="/auth/signin">
               <Button
                 variant="outline"
-                className="hidden sm:inline-flex hover:scale-105 transition-transform"
+                className="hidden sm:inline-flex hover:scale-105 transition-transform hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-700"
               >
                 Sign In
               </Button>
             </Link>
           )}
 
-          <ConnectButton />
+          <ConnectButton showBalance={false} chainStatus="icon" />
         </div>
       </div>
     </header>

@@ -45,7 +45,7 @@ const connectors = connectorsForWallets(
     },
   ],
   {
-    appName: "My RainbowKit App",
+    appName: "Crailo",
     projectId: "YOUR_PROJECT_ID",
   }
 );
