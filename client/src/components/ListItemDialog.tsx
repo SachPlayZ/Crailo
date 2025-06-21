@@ -40,7 +40,6 @@ const pinata = new PinataSDK({
   pinataGateway: process.env.NEXT_PUBLIC_PINATA_GATEWAY_URL!,
 });
 
-
 interface IPFSFile {
   IpfsHash: string;
   PinSize: number;
@@ -80,6 +79,8 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
   const { address } = useAccount();
   const { data: session } = useSession();
 
+  const { NEXT_PUBLIC_PINATA_GATEWAY_URL } = process.env;
+
   const categories = [
     { id: "electronics", name: "Electronics", icon: "📱" },
     { id: "fashion", name: "Fashion", icon: "👕" },
@@ -116,10 +117,13 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
         try {
           const upload = await pinata.upload.public.file(image);
           const response = upload as any;
-          const ipfsHash = response.cid || (response.data && response.data.IpfsHash);
+          const ipfsHash =
+            response.cid || (response.data && response.data.IpfsHash);
 
           if (ipfsHash) {
-            imageUrls.push(`https://ipfs.io/ipfs/${ipfsHash}`);
+            imageUrls.push(
+              `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${ipfsHash}`
+            );
           }
         } catch (error) {
           console.error("Error uploading image:", error);
@@ -145,7 +149,8 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
       // Upload metadata to IPFS
       const metadataUpload = await pinata.upload.public.json(metadata);
       const response2 = metadataUpload as any;
-      const ipfsHash = response2.cid || (response2.data && response2.data.IpfsHash);
+      const ipfsHash =
+        response2.cid || (response2.data && response2.data.IpfsHash);
 
       console.log("Metadata IPFS Hash:", ipfsHash);
       console.log("Full metadata:", metadata);
@@ -153,7 +158,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
       // Call the smart contract to create the listing
       await createListing(
         metadata.description,
-        `https://ipfs.io/ipfs/${ipfsHash}`,
+        `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${ipfsHash}`,
         metadata.price.toString()
       );
       console.log("Listing created successfully");

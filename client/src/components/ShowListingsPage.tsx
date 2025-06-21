@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +22,11 @@ import { useListing } from "@/utils/listing";
 const fetchIPFSData = async (ipfsHash: string) => {
   try {
     const response = await fetch(ipfsHash);
-    if (!response.ok) throw new Error('Failed to fetch IPFS data');
+    if (!response.ok) throw new Error("Failed to fetch IPFS data");
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching IPFS data:', error);
+    console.error("Error fetching IPFS data:", error);
     return null;
   }
 };
@@ -52,23 +52,29 @@ const ShowListingsPage = () => {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { getListings } = useListing();
+  const { getListings, refetchListings } = useListing();
 
-  useEffect(() => {
-    const fetchListings = async () => {
-      const fetchedListings = await getListings() as any[];
-      
+  const fetchListings = useCallback(async () => {
+    if (isLoading) return; // Prevent multiple simultaneous fetches
+
+    setIsLoading(true);
+    try {
+      const fetchedListings = (await getListings()) as any[];
+
       // Fetch IPFS data for each listing
       const listingsWithData = await Promise.all(
         (fetchedListings ?? []).map(async (listing: any) => {
           if (listing.imageHash) {
-            const ipfsData = await fetchIPFSData(listing.imageHash || listing.ipfsHash);
+            const ipfsData = await fetchIPFSData(
+              listing.imageHash || listing.ipfsHash
+            );
             if (ipfsData) {
               return {
                 ...ipfsData,
                 id: listing.id, // Preserve any additional blockchain data
-                ipfsHash: listing.ipfsHash
+                ipfsHash: listing.ipfsHash,
               };
             }
           }
@@ -77,10 +83,16 @@ const ShowListingsPage = () => {
       );
 
       setListings(listingsWithData as Listing[]);
-    };
+    } catch (error) {
+      console.error("Error fetching listings:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getListings, isLoading]);
 
+  useEffect(() => {
     fetchListings();
-  }, [getListings]);
+  }, []);
 
   console.log("Fetched Listings:", listings);
   const categories = [
@@ -240,10 +252,11 @@ const ShowListingsPage = () => {
                   selectedCategory === category.id ? "default" : "outline"
                 }
                 onClick={() => setSelectedCategory(category.id)}
-                className={`transition-all duration-200 hover:scale-105 ${selectedCategory === category.id
+                className={`transition-all duration-200 hover:scale-105 ${
+                  selectedCategory === category.id
                     ? "bg-green-600 hover:bg-green-700 text-white border-green-600 shadow-lg"
                     : "border-green-200 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm"
-                  }`}
+                }`}
               >
                 <span className="mr-2">{category.icon}</span>
                 {category.name}
