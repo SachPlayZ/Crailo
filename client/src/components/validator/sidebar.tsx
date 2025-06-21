@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/validator/dashboard?tab=dashboard", icon: Home },
@@ -23,13 +24,9 @@ export function Sidebar() {
     <div className="flex h-full w-64 flex-col bg-card/80 backdrop-blur-sm border-r border-border/50">
       {/* Logo */}
       <Link href="/">
-        <div className="flex h-16 items-center px-6 border-b border-border/50">
-          <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            <span className="text-xl font-bold text-foreground">Crailo</span>
-          </div>
+        <div className="flex h-16 items-center px-6 border-b border-border/50 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 rounded-full blur-xl"></div>
+          <Image src="/logo.png" alt="Crailo" width={100} height={100} className="relative z-10" />
         </div>
       </Link>
 
