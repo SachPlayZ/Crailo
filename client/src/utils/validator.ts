@@ -99,7 +99,7 @@ export const useStakeValidator = () => {
   return { stakeAsValidator, unstakeValidator };
 };
 
-export const useValidatorGet = async (userAddress: string) => {
+export const useValidatorGet = (userAddress: string) => {
   const { data: validatorInfo, refetch: refetchValidatorInfo } =
     useReadContract({
       address: validatorAddress,
