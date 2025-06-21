@@ -19,21 +19,18 @@ import {
 } from "lucide-react";
 
 interface Listing {
-  id: string;
   title: string;
   description: string;
   price: number;
   location: string;
   seller: {
     name: string;
-    rating: number;
-    verified: boolean;
+    address: string;
   };
-  image: string;
+  images: string[];
   category: string;
   condition: string;
   escrowAmount: number;
-  createdAt: string;
 }
 
 const ShowListingsPage = () => {
@@ -51,108 +48,55 @@ const ShowListingsPage = () => {
 
   const sampleListings: Listing[] = [
     {
-      id: "1",
       title: "MacBook Pro 2023 - M2 Chip",
-      description:
-        "Excellent condition, barely used. Comes with original box and charger.",
+      description: "Excellent condition, barely used. Comes with original box and charger.",
       price: 1200,
       location: "San Francisco, CA",
       seller: {
         name: "Alex Chen",
-        rating: 4.9,
-        verified: true,
+        address: "0x0000..."
       },
-      image: "/api/placeholder/300/200",
+      images: [
+        "https://ipfs.io/ipfs/bafkreidw724vbzcbq4q3srdgqnfy5badkivgouvqe6b4tbdv2hovcgaodq",
+        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee"
+      ],
       category: "electronics",
       condition: "Like New",
-      escrowAmount: 120,
-      createdAt: "2 hours ago",
+      escrowAmount: 120
     },
     {
-      id: "2",
       title: "Nike Air Jordan 1 Retro",
       description: "Limited edition, size 10.5. Perfect for collectors.",
       price: 350,
-      location: "Los Angeles, CA",
+      location: "Not Specified",
       seller: {
-        name: "Sarah Johnson",
-        rating: 4.8,
-        verified: true,
+        name: "Anonymous",
+        address: "0x0000..."
       },
-      image: "/api/placeholder/300/200",
+      images: [
+        "https://ipfs.io/ipfs/bafkreidw724vbzcbq4q3srdgqnfy5badkivgouvqe6b4tbdv2hovcgaodq",
+        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee"
+      ],
       category: "fashion",
-      condition: "Excellent",
-      escrowAmount: 35,
-      createdAt: "4 hours ago",
+      condition: "Not Specified",
+      escrowAmount: 35
     },
     {
-      id: "3",
       title: "Gaming PC Setup - RTX 4070",
       description: "High-end gaming rig with 32GB RAM, 1TB SSD. Ready to game!",
       price: 1800,
-      location: "Seattle, WA",
+      location: "Not Specified",
       seller: {
-        name: "Mike Rodriguez",
-        rating: 4.7,
-        verified: true,
+        name: "Anonymous",
+        address: "0x0000..."
       },
-      image: "/api/placeholder/300/200",
+      images: [
+        "https://ipfs.io/ipfs/bafkreidw724vbzcbq4q3srdgqnfy5badkivgouvqe6b4tbdv2hovcgaodq",
+        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee"
+      ],
       category: "electronics",
-      condition: "Excellent",
-      escrowAmount: 180,
-      createdAt: "6 hours ago",
-    },
-    {
-      id: "4",
-      title: "Vintage Camera Collection",
-      description: "Rare collection of 5 vintage cameras from the 1960s-1980s.",
-      price: 850,
-      location: "New York, NY",
-      seller: {
-        name: "Emma Wilson",
-        rating: 4.9,
-        verified: true,
-      },
-      image: "/api/placeholder/300/200",
-      category: "electronics",
-      condition: "Good",
-      escrowAmount: 85,
-      createdAt: "1 day ago",
-    },
-    {
-      id: "5",
-      title: "Designer Handbag - Louis Vuitton",
-      description: "Authentic LV Neverfull MM in excellent condition.",
-      price: 1200,
-      location: "Miami, FL",
-      seller: {
-        name: "Jessica Lee",
-        rating: 4.8,
-        verified: true,
-      },
-      image: "/api/placeholder/300/200",
-      category: "fashion",
-      condition: "Like New",
-      escrowAmount: 120,
-      createdAt: "1 day ago",
-    },
-    {
-      id: "6",
-      title: "Professional Guitar - Fender Stratocaster",
-      description:
-        "American-made Stratocaster with custom pickups. Perfect tone.",
-      price: 950,
-      location: "Austin, TX",
-      seller: {
-        name: "David Thompson",
-        rating: 4.6,
-        verified: true,
-      },
-      image: "/api/placeholder/300/200",
-      category: "electronics",
-      condition: "Excellent",
-      escrowAmount: 95,
-      createdAt: "2 days ago",
+      condition: "Not Specified",
+      escrowAmount: 180
     },
   ];
 
@@ -274,14 +218,19 @@ const ShowListingsPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((listing) => (
-              <Card
-                key={listing.id}
-                className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-lg hover:shadow-green-500/10 flex flex-col h-full"
+              <Card              key={listing.title}
+              className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-lg hover:shadow-green-500/10 flex flex-col h-full"
               >
                 <CardHeader className="pb-4 flex-shrink-0">
-                  <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-lg mb-4 flex items-center justify-center shadow-inner">
-                    <div className="text-4xl">📦</div>
-                  </div>
+                  {listing.images && listing.images.length > 0 && (
+                    <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-lg mb-4 overflow-hidden shadow-inner">
+                      <img 
+                        src={listing.images[0]} 
+                        alt={listing.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex items-start justify-between mb-2">
                     <CardTitle className="text-lg line-clamp-2 group-hover:text-green-600 transition-colors">
@@ -306,7 +255,7 @@ const ShowListingsPage = () => {
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock className="w-3 h-3" />
-                      <span>{listing.createdAt}</span>
+                      <span>Recently Listed</span>
                     </div>
                   </div>
                 </CardHeader>
@@ -326,13 +275,9 @@ const ShowListingsPage = () => {
                             {listing.seller.name}
                           </p>
                           <div className="flex items-center space-x-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-xs text-muted-foreground">
-                              {listing.seller.rating}
+                            <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                              {listing.seller.address}
                             </span>
-                            {listing.seller.verified && (
-                              <Shield className="w-3 h-3 text-green-600 dark:text-green-400" />
-                            )}
                           </div>
                         </div>
                       </div>
