@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "./_providers/rainbowkit";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import AuthProvider from "@/components/AuthProvider";
 import Navigation from "@/components/Navigation";
 import "./globals.css";
 
@@ -31,11 +32,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <ThemeProvider>
-            <Navigation>{children}</Navigation>
-          </ThemeProvider>
-        </Providers>
+        <AuthProvider>
+          <Providers>
+            <ThemeProvider>
+              <Navigation>{children}</Navigation>
+            </ThemeProvider>
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   );
