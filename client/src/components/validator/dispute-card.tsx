@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Clock, ExternalLink } from "lucide-react";
+import { CheckCircle, XCircle, Clock, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { VoteConfirmationModal } from "./vote-confirmation-modal";
 import { cn } from "@/lib/utils";
 
@@ -15,8 +15,8 @@ interface DisputeCardProps {
     productImage: string;
     sellerAddress: string;
     buyerAddress: string;
-    originalImage: string;
-    receivedImage: string;
+    originalImages: string[];
+    receivedImages: string[];
     descriptionMismatch: string;
     timeAgo: string;
     status: "pending" | "voted" | "resolved";
@@ -26,10 +26,10 @@ interface DisputeCardProps {
 
 export function DisputeCard({ dispute }: DisputeCardProps) {
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [pendingVote, setPendingVote] = useState<"valid" | "misleading" | null>(
-    null
-  );
+  const [pendingVote, setPendingVote] = useState<"valid" | "misleading" | null>(null);
   const [userVote, setUserVote] = useState(dispute.userVote);
+  const [originalImageIndex, setOriginalImageIndex] = useState(0);
+  const [receivedImageIndex, setReceivedImageIndex] = useState(0);
 
   const handleVoteClick = (voteType: "valid" | "misleading") => {
     setPendingVote(voteType);
@@ -45,6 +45,30 @@ export function DisputeCard({ dispute }: DisputeCardProps) {
   const handleCloseModal = () => {
     setShowConfirmation(false);
     setPendingVote(null);
+  };
+
+  const nextOriginalImage = () => {
+    setOriginalImageIndex((prev) =>
+      prev + 1 >= dispute.originalImages.length ? 0 : prev + 1
+    );
+  };
+
+  const prevOriginalImage = () => {
+    setOriginalImageIndex((prev) =>
+      prev - 1 < 0 ? dispute.originalImages.length - 1 : prev - 1
+    );
+  };
+
+  const nextReceivedImage = () => {
+    setReceivedImageIndex((prev) =>
+      prev + 1 >= dispute.receivedImages.length ? 0 : prev + 1
+    );
+  };
+
+  const prevReceivedImage = () => {
+    setReceivedImageIndex((prev) =>
+      prev - 1 < 0 ? dispute.receivedImages.length - 1 : prev - 1
+    );
   };
 
   return (
@@ -74,11 +98,11 @@ export function DisputeCard({ dispute }: DisputeCardProps) {
                 className={cn(
                   "text-xs px-2 py-1",
                   dispute.status === "pending" &&
-                    "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
+                  "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
                   dispute.status === "voted" &&
-                    "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
+                  "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
                   dispute.status === "resolved" &&
-                    "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
+                  "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
                 )}
               >
                 {dispute.status === "pending" && (
@@ -133,14 +157,34 @@ export function DisputeCard({ dispute }: DisputeCardProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Original Listing
+                  Original Listing ({originalImageIndex + 1}/{dispute.originalImages.length})
                 </p>
                 <div className="relative group">
                   <img
-                    src={dispute.originalImage || "/placeholder.svg"}
-                    alt="Original listing"
+                    src={dispute.originalImages[originalImageIndex] || "/placeholder.svg"}
+                    alt={`Original listing ${originalImageIndex + 1}`}
                     className="w-full h-32 object-cover rounded-lg border border-green-200 dark:border-green-800"
                   />
+                  {dispute.originalImages.length > 1 && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-1"
+                        onClick={prevOriginalImage}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-1"
+                        onClick={nextOriginalImage}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <ExternalLink className="w-5 h-5 text-white" />
                   </div>
@@ -148,14 +192,34 @@ export function DisputeCard({ dispute }: DisputeCardProps) {
               </div>
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Received Product
+                  Received Product ({receivedImageIndex + 1}/{dispute.receivedImages.length})
                 </p>
                 <div className="relative group">
                   <img
-                    src={dispute.receivedImage || "/placeholder.svg"}
-                    alt="Received product"
+                    src={dispute.receivedImages[receivedImageIndex] || "/placeholder.svg"}
+                    alt={`Received product ${receivedImageIndex + 1}`}
                     className="w-full h-32 object-cover rounded-lg border border-green-200 dark:border-green-800"
                   />
+                  {dispute.receivedImages.length > 1 && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-1"
+                        onClick={prevReceivedImage}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-1"
+                        onClick={nextReceivedImage}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <ExternalLink className="w-5 h-5 text-white" />
                   </div>

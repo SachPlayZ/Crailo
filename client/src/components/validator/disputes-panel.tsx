@@ -5,7 +5,6 @@ import { Sidebar } from "@/components/validator/sidebar";
 import { Header } from "@/components/validator/header";
 import { DisputeFilters } from "@/components/validator/dispute-filters";
 import { DisputeCard } from "@/components/validator/dispute-card";
-import { getActiveDisputes, useVoteOnDispute } from "@/utils/Dispute";
 
 // Use the provided mockDisputes
 const mockDisputes = [
@@ -15,8 +14,15 @@ const mockDisputes = [
     productImage: "/placeholder.svg?height=48&width=48",
     sellerAddress: "0x1a2b...3c4d",
     buyerAddress: "0x5e6f...7g8h",
-    originalImage: "/placeholder.svg?height=128&width=128",
-    receivedImage: "/placeholder.svg?height=128&width=128",
+    originalImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
+    receivedImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
     descriptionMismatch:
       "Product received appears to be a replica, not authentic vintage Rolex as described.",
     timeAgo: "3h ago",
@@ -28,8 +34,14 @@ const mockDisputes = [
     productImage: "/placeholder.svg?height=48&width=48",
     sellerAddress: "0x9i0j...1k2l",
     buyerAddress: "0x3m4n...5o6p",
-    originalImage: "/placeholder.svg?height=128&width=128",
-    receivedImage: "/placeholder.svg?height=128&width=128",
+    originalImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
+    receivedImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
     descriptionMismatch:
       "Size mismatch - received US 9 instead of advertised US 10.5.",
     timeAgo: "5h ago",
@@ -41,8 +53,14 @@ const mockDisputes = [
     productImage: "/placeholder.svg?height=48&width=48",
     sellerAddress: "0x7q8r...9s0t",
     buyerAddress: "0x1u2v...3w4x",
-    originalImage: "/placeholder.svg?height=128&width=128",
-    receivedImage: "/placeholder.svg?height=128&width=128",
+    originalImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
+    receivedImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
     descriptionMismatch: "",
     timeAgo: "1d ago",
     status: "voted" as const,
@@ -54,8 +72,15 @@ const mockDisputes = [
     productImage: "/placeholder.svg?height=48&width=48",
     sellerAddress: "0x5y6z...7a8b",
     buyerAddress: "0x9c0d...1e2f",
-    originalImage: "/placeholder.svg?height=128&width=128",
-    receivedImage: "/placeholder.svg?height=128&width=128",
+    originalImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
+    receivedImages: [
+      "/placeholder.svg?height=128&width=128",
+      "/placeholder.svg?height=128&width=128",
+    ],
     descriptionMismatch:
       "Color significantly different from listing photos - appears to be a different shade entirely.",
     timeAgo: "2d ago",
@@ -67,13 +92,6 @@ export default function DisputesPanel() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [disputes, setDisputes] = useState(mockDisputes);
   const [isLoading, setIsLoading] = useState(true);
-  const {
-    data: fetchedDisputes,
-    isLoading: isFetchingLoading,
-    isError,
-    error,
-  } = getActiveDisputes();
-  const { voteOnDispute, isPending } = useVoteOnDispute();
 
   useEffect(() => {
     // Simulate loading
@@ -84,44 +102,12 @@ export default function DisputesPanel() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    // If fetchedDisputes is available and non-empty, merge with mockDisputes
-    if (
-      !isFetchingLoading &&
-      Array.isArray(fetchedDisputes) &&
-      fetchedDisputes.length > 0
-    ) {
-      // Merge mockDisputes and fetchedDisputes, avoiding duplicates by id
-      const merged = [
-        ...mockDisputes,
-        ...fetchedDisputes.filter(
-          (fd: any) => !mockDisputes.some((md) => md.id === fd.id)
-        ),
-      ];
-      setDisputes(merged);
-    } else if (!isFetchingLoading) {
-      setDisputes(mockDisputes);
-    }
-  }, [isFetchingLoading, fetchedDisputes]);
-
-  const handleVote = async (disputeId: string, productValid: boolean) => {
-    try {
-      await voteOnDispute({
-        disputeId,
-        productValid: productValid ? "true" : "false",
-      });
-      // Optionally refetch disputes here
-    } catch (e) {
-      alert("Vote failed");
-    }
-  };
-
   const filteredDisputes = disputes.filter((dispute) => {
     if (activeFilter === "all") return true;
     return dispute.status === activeFilter;
   });
 
-  if (isLoading || isFetchingLoading) {
+  if (isLoading) {
     return (
       <div className="relative min-h-screen bg-gradient-to-br from-green-50 via-background to-emerald-50 dark:from-green-950 dark:via-background dark:to-emerald-900 overflow-hidden">
         {/* Background decorative elements */}
@@ -158,10 +144,6 @@ export default function DisputesPanel() {
         </div>
       </div>
     );
-  }
-
-  if (isError) {
-    return <div>Error loading disputes: {error?.message}</div>;
   }
 
   return (

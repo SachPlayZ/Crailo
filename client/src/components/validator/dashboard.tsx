@@ -5,8 +5,15 @@ import { Header } from "@/components/validator/header";
 import { StatsCards } from "@/components/validator/stats-cards";
 import { RepChart } from "@/components/validator/rep-chart";
 import { RecentActivity } from "@/components/validator/recent-activity";
+import { useValidatorGet } from "@/utils/validator";
+import { useAccount } from "wagmi";
 
 export default function ValidatorDashboard() {
+  const { address } = useAccount();
+  const { validatorInfo, refetchValidatorInfo } =  useValidatorGet(address as string);
+
+  console.log("Validator Info:", validatorInfo);
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-green-50 via-background to-emerald-50 dark:from-green-950 dark:via-background dark:to-emerald-900 overflow-hidden">
       {/* Background decorative elements */}
