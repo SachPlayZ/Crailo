@@ -168,12 +168,24 @@ export const useUserHistory = (userAddress: string) => {
     }
   };
 
-  
-
   return {
     historyListings: data,
     isLoading,
     refetchUserHistory,
     getUserHistoryData,
+  };
+};
+
+export const getListingData = (uid: number) => {
+  const { data: productData, refetch: refetchProduct } = useReadContract({
+    abi: escrowABI,
+    address: escrowAddress,
+    functionName: "getListing",
+    args: [uid],
+  });
+
+  return {
+    productData,
+    refetchProduct,
   };
 };
