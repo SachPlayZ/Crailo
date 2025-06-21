@@ -135,6 +135,7 @@ export const useListing = () => {
     commitToBuy,
     confirmDelivery,
     getListings,
+    refetchListings,
   };
 };
 
