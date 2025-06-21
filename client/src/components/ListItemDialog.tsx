@@ -30,8 +30,10 @@ import {
   Image as ImageIcon,
   Shield,
 } from "lucide-react";
+import { useAccount } from "wagmi";
 import { PinataSDK } from "pinata";
 import { useListing } from "@/utils/listing";
+import { useSession } from "next-auth/react";
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT!,
@@ -74,6 +76,9 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
     description: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { address } = useAccount();
+  const { data: session } = useSession();
 
   const categories = [
     { id: "electronics", name: "Electronics", icon: "📱" },
@@ -128,19 +133,19 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
         price: parseFloat(formData.price),
         location: "Not Specified",
         seller: {
-          name: "Anonymous",
-          address: "0x0000..."
+          name: session?.user?.name || "Anonymous",
+          address: address || "0x0000...",
         },
         images: imageUrls,
         category: formData.category,
         condition: "Not Specified",
-        escrowAmount: parseFloat(formData.price) * 0.1
+        escrowAmount: parseFloat(formData.price) * 0.1,
       };
 
       // Upload metadata to IPFS
       const metadataUpload = await pinata.upload.public.json(metadata);
       const response2 = metadataUpload as any;
-      const ipfsHash = response2.IpfsHash || (response2.data && response2.data.IpfsHash);
+      const ipfsHash = response2.cid || (response2.data && response2.data.IpfsHash);
 
       console.log("Metadata IPFS Hash:", ipfsHash);
       console.log("Full metadata:", metadata);
