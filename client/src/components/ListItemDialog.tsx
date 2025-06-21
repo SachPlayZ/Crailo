@@ -140,7 +140,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
       // Upload metadata to IPFS
       const metadataUpload = await pinata.upload.public.json(metadata);
       const response2 = metadataUpload as any;
-      const ipfsHash = response2.IpfsHash || (response2.data && response2.data.IpfsHash);
+      const ipfsHash = response2.cid || (response2.data && response2.data.IpfsHash);
 
       console.log("Metadata IPFS Hash:", ipfsHash);
       console.log("Full metadata:", metadata);
