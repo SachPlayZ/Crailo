@@ -12,7 +12,7 @@ export function useCreateDispute() {
     seller,
     reason,
   }: {
-    listingId: string; // or string if you prefer and convert it to BigInt
+    listingId: string;
     buyer: string;
     imageHash: string;
     seller: string;
