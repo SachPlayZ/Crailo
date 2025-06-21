@@ -131,7 +131,7 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
         </div>
 
         {/* Centered Navigation - Columns 3-10 */}
-        <nav className="col-start-3 col-span-8 hidden md:flex items-center justify-center space-x-8">
+        <nav className="col-start-3 col-span-7 hidden md:flex items-center justify-center space-x-8">
           {!session ? (
             <>
               <button
@@ -254,7 +254,7 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
         </nav>
 
         {/* Right side controls - Columns 11-12 */}
-        <div className="col-start-11 col-span-2 flex items-center justify-end space-x-4">
+        <div className="col-start-10 col-span-3 flex items-center justify-end space-x-4">
           <Button
             variant="ghost"
             size="icon"

@@ -11,7 +11,7 @@ import {
 
 const PlatformOverview = () => {
   return (
-    <div className="relative w-full max-w-lg mx-auto">
+    <div className="relative w-full max-w-lg ms-auto">
       {/* Main container */}
       <div className="relative bg-card border border-border rounded-3xl p-8 shadow-2xl shadow-green-500/10">
         {/* Header */}

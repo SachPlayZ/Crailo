@@ -125,7 +125,7 @@ const HeroSection = ({ heroInView }: HeroSectionProps) => {
           </div>
 
           {/* Right side - Platform Overview */}
-          <div className="flex justify-center animate-slide-in-right">
+          <div className="flex justify-end animate-slide-in-right">
             <PlatformOverview />
           </div>
         </div>
