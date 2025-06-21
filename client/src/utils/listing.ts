@@ -1,10 +1,11 @@
 import { useWriteContract, useReadContract } from "wagmi";
 import { escrowABI, escrowAddress } from "@/app/abi";
 import { parseEther } from "viem";
+import { useWatchContractEvent } from "wagmi";
+import { useEffect } from "react";
 
 export const useListing = () => {
   const { writeContractAsync } = useWriteContract();
-
   const {
     data: listings,
     refetch: refetchListings,
@@ -17,6 +18,42 @@ export const useListing = () => {
     abi: escrowABI,
     functionName: "getListings",
     args: [],
+  });
+
+  // Fetch listings on component mount
+  useEffect(() => {
+    refetchListings();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Watch for listing-related events and refetch when they occur
+  useWatchContractEvent({
+    address: escrowAddress,
+    abi: escrowABI,
+    eventName: "ListingCreated", // Replace with your actual event name
+    onLogs(logs) {
+      console.log("ListingCreated event detected, refetching listings...");
+      refetchListings();
+    },
+  });
+
+  useWatchContractEvent({
+    address: escrowAddress,
+    abi: escrowABI,
+    eventName: "ListingUpdated", // Replace with your actual event name
+    onLogs(logs) {
+      console.log("ListingUpdated event detected, refetching listings...");
+      refetchListings();
+    },
+  });
+
+  useWatchContractEvent({
+    address: escrowAddress,
+    abi: escrowABI,
+    eventName: "ListingCompleted", // Replace with your actual event name
+    onLogs(logs) {
+      console.log("ListingCompleted event detected, refetching listings...");
+      refetchListings();
+    },
   });
 
   const createListing = async (
