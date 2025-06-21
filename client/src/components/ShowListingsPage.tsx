@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Carousel } from "@/components/ui/carousel";
 import ListItemDialog from "./ListItemDialog";
+import ListingDetailsModal from "./ListingDetailsModal";
 import {
   Search,
   Filter,
@@ -37,6 +38,8 @@ interface Listing {
 const ShowListingsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const categories = [
     { id: "all", name: "All Items", icon: "📦" },
@@ -109,6 +112,12 @@ const ShowListingsPage = () => {
       selectedCategory === "all" || listing.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleConfirmDeposit = async () => {
+    // TODO: Implement the smart contract interaction for escrow deposit
+    console.log("Confirming deposit for listing:", selectedListing);
+    setIsDetailsModalOpen(false);
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-green-50 via-background to-emerald-50 dark:from-green-950 dark:via-background dark:to-emerald-900 overflow-hidden">
@@ -219,8 +228,9 @@ const ShowListingsPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((listing) => (
-              <Card              key={listing.title}
-              className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-lg hover:shadow-green-500/10 flex flex-col h-full"
+              <Card
+                key={listing.title}
+                className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-lg hover:shadow-green-500/10 flex flex-col h-full"
               >
                 <CardHeader className="pb-4 flex-shrink-0">
                   {listing.images && listing.images.length > 0 && (
@@ -300,7 +310,13 @@ const ShowListingsPage = () => {
                     </div>
 
                     {/* Action Button */}
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                      onClick={() => {
+                        setSelectedListing(listing);
+                        setIsDetailsModalOpen(true);
+                      }}
+                    >
                       View Details
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -311,6 +327,16 @@ const ShowListingsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Details Modal */}
+      {selectedListing && (
+        <ListingDetailsModal
+          isOpen={isDetailsModalOpen}
+          onOpenChange={setIsDetailsModalOpen}
+          listing={selectedListing}
+          onConfirmDeposit={handleConfirmDeposit}
+        />
+      )}
     </div>
   );
 };

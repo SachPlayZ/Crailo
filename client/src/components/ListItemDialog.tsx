@@ -31,6 +31,7 @@ import {
   Shield,
 } from "lucide-react";
 import { PinataSDK } from "pinata";
+import { useListing } from "@/utils/listing";
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT!,
@@ -92,6 +93,8 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
     }
   };
 
+  const { createListing } = useListing();
+
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
   };
@@ -103,13 +106,13 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
     try {
       // Upload images to IPFS one by one
       const imageUrls: string[] = [];
-      
+
       for (const image of images) {
         try {
           const upload = await pinata.upload.public.file(image);
           const response = upload as any;
           const ipfsHash = response.cid || (response.data && response.data.IpfsHash);
-          
+
           if (ipfsHash) {
             imageUrls.push(`https://ipfs.io/ipfs/${ipfsHash}`);
           }
@@ -138,9 +141,17 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
       const metadataUpload = await pinata.upload.public.json(metadata);
       const response2 = metadataUpload as any;
       const ipfsHash = response2.IpfsHash || (response2.data && response2.data.IpfsHash);
-      
+
       console.log("Metadata IPFS Hash:", ipfsHash);
       console.log("Full metadata:", metadata);
+
+      // Call the smart contract to create the listing
+      await createListing(
+        metadata.description,
+        `https://ipfs.io/ipfs/${ipfsHash}`,
+        metadata.price.toString()
+      );
+      console.log("Listing created successfully");
 
       setOpen(false);
       // Reset form
@@ -261,7 +272,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
           {/* Price */}
           <div className="space-y-2">
             <Label htmlFor="price" className="text-sm font-medium">
-              Price (USD) *
+              Price (CORE) *
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -269,7 +280,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                 id="price"
                 type="number"
                 min="0"
-                step="0.01"
+                step="0.000001"
                 placeholder="0.00"
                 value={formData.price}
                 onChange={(e) => handleInputChange("price", e.target.value)}
@@ -281,7 +292,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
               <Badge variant="outline" className="text-xs">
                 Escrow: $
                 {formData.price
-                  ? (parseFloat(formData.price) * 0.1).toFixed(2)
+                  ? (parseFloat(formData.price) * 0.1).toFixed(5)
                   : "0.00"}
               </Badge>
               <span>(10% of price)</span>

@@ -21,11 +21,11 @@ export const useListing = () => {
         abi: escrowABI,
         functionName: "createListing",
         args: [
-          "iPhone 13 Pro Max, 256GB, Excellent condition",
-          "QmXyZ123AbC456DeF789",
-          parseEther("0.001"),
+          description,
+          imageHash,
+          parseEther(price),
         ],
-        value: parseEther("0.0001"),
+        value: parseEther(price),
       });
 
       if (tx) {
