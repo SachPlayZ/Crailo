@@ -67,12 +67,13 @@ export const useListing = () => {
         imageHash,
         price,
       });
+      const toStake = parseFloat(price) * 0.1; // 10% of the price as stake
       const tx = await writeContractAsync({
         address: escrowAddress,
         abi: escrowABI,
         functionName: "createListing",
         args: [description, imageHash, parseEther(price)],
-        value: parseEther(price),
+        value: parseEther(toStake.toString()), // Send 10% of the price as stake
       });
 
       if (tx) {
