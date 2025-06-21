@@ -1,94 +1,24 @@
-export const contractABI = [
+export const escrowABI = [
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_validatorContract",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_disputeContract",
+        type: "address",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "allowance",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "needed",
-        type: "uint256",
-      },
-    ],
-    name: "ERC20InsufficientAllowance",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "balance",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "needed",
-        type: "uint256",
-      },
-    ],
-    name: "ERC20InsufficientBalance",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "approver",
-        type: "address",
-      },
-    ],
-    name: "ERC20InvalidApprover",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "receiver",
-        type: "address",
-      },
-    ],
-    name: "ERC20InvalidReceiver",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-    ],
-    name: "ERC20InvalidSender",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-    ],
-    name: "ERC20InvalidSpender",
-    type: "error",
   },
   {
     inputs: [
@@ -111,31 +41,6 @@ export const contractABI = [
     ],
     name: "OwnableUnauthorizedAccount",
     type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "Approval",
-    type: "event",
   },
   {
     anonymous: false,
@@ -167,24 +72,18 @@ export const contractABI = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
-        name: "disputeId",
-        type: "uint256",
+        internalType: "string",
+        name: "param",
+        type: "string",
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: "uint256",
-        name: "listingId",
+        name: "newValue",
         type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "buyer",
-        type: "address",
       },
     ],
-    name: "DisputeCreated",
+    name: "ConfigUpdated",
     type: "event",
   },
   {
@@ -193,17 +92,24 @@ export const contractABI = [
       {
         indexed: true,
         internalType: "uint256",
-        name: "disputeId",
+        name: "listingId",
         type: "uint256",
       },
+    ],
+    name: "DeliveryConfirmed",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
       {
-        indexed: false,
-        internalType: "bool",
-        name: "productValid",
-        type: "bool",
+        indexed: true,
+        internalType: "uint256",
+        name: "listingId",
+        type: "uint256",
       },
     ],
-    name: "DisputeResolved",
+    name: "ListingCancelled",
     type: "event",
   },
   {
@@ -276,178 +182,8 @@ export const contractABI = [
     type: "event",
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "Transfer",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "validator",
-        type: "address",
-      },
-    ],
-    name: "ValidatorAdded",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "validator",
-        type: "address",
-      },
-    ],
-    name: "ValidatorRemoved",
-    type: "event",
-  },
-  {
     inputs: [],
-    name: "BUYER_PENALTY_PERCENT",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "DISPUTE_DURATION",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "SELLER_STAKE_PERCENT",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "VALIDATOR_REWARD",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "validator",
-        type: "address",
-      },
-    ],
-    name: "addValidator",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-    ],
-    name: "allowance",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "approve",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "balanceOf",
+    name: "buyerPenaltyPercent",
     outputs: [
       {
         internalType: "uint256",
@@ -540,89 +276,12 @@ export const contractABI = [
   },
   {
     inputs: [],
-    name: "decimals",
+    name: "disputeContract",
     outputs: [
       {
-        internalType: "uint8",
+        internalType: "contract DisputeContract",
         name: "",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "disputeCounter",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "disputes",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "listingId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "buyer",
         type: "address",
-      },
-      {
-        internalType: "address",
-        name: "seller",
-        type: "address",
-      },
-      {
-        internalType: "string",
-        name: "reason",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "createdAt",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "deadline",
-        type: "uint256",
-      },
-      {
-        internalType: "enum Escrow.DisputeStatus",
-        name: "status",
-        type: "uint8",
-      },
-      {
-        internalType: "uint256",
-        name: "yesVotes",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "noVotes",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -641,60 +300,6 @@ export const contractABI = [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "disputeId",
-        type: "uint256",
-      },
-    ],
-    name: "getDispute",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "listingId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "buyer",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "seller",
-        type: "address",
-      },
-      {
-        internalType: "string",
-        name: "reason",
-        type: "string",
-      },
-      {
-        internalType: "enum Escrow.DisputeStatus",
-        name: "status",
-        type: "uint8",
-      },
-      {
-        internalType: "uint256",
-        name: "yesVotes",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "noVotes",
         type: "uint256",
       },
     ],
@@ -747,7 +352,7 @@ export const contractABI = [
         type: "address",
       },
       {
-        internalType: "enum Escrow.ListingStatus",
+        internalType: "enum MainEscrow.ListingStatus",
         name: "status",
         type: "uint8",
       },
@@ -819,7 +424,7 @@ export const contractABI = [
         type: "uint256",
       },
       {
-        internalType: "enum Escrow.ListingStatus",
+        internalType: "enum MainEscrow.ListingStatus",
         name: "status",
         type: "uint8",
       },
@@ -827,19 +432,6 @@ export const contractABI = [
         internalType: "uint256",
         name: "createdAt",
         type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "name",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
       },
     ],
     stateMutability: "view",
@@ -872,19 +464,6 @@ export const contractABI = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "validator",
-        type: "address",
-      },
-    ],
-    name: "removeValidator",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [],
     name: "renounceOwnership",
     outputs: [],
@@ -895,13 +474,31 @@ export const contractABI = [
     inputs: [
       {
         internalType: "uint256",
-        name: "disputeId",
+        name: "listingId",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "productValid",
+        type: "bool",
+      },
+    ],
+    name: "resolveDisputeCallback",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "sellerStakePercent",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
         type: "uint256",
       },
     ],
-    name: "resolveDispute",
-    outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -925,6 +522,346 @@ export const contractABI = [
   },
   {
     inputs: [],
+    name: "token",
+    outputs: [
+      {
+        internalType: "contract CrailoToken",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_newPercent",
+        type: "uint256",
+      },
+    ],
+    name: "updateBuyerPenaltyPercent",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_newPercent",
+        type: "uint256",
+      },
+    ],
+    name: "updateSellerStakePercent",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "validatorContract",
+    outputs: [
+      {
+        internalType: "contract ValidatorContract",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+
+export const escrowAddress = "0x3E4c1Df312B7dF41a2224fE1C31eEaB41a1ECDE0";
+
+export const validatorABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "OwnableInvalidOwner",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "OwnableUnauthorizedAccount",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "string",
+        name: "param",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "newValue",
+        type: "uint256",
+      },
+    ],
+    name: "ConfigUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "stake",
+        type: "uint256",
+      },
+    ],
+    name: "ValidatorAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+    ],
+    name: "ValidatorRemoved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "reward",
+        type: "uint256",
+      },
+    ],
+    name: "ValidatorRewarded",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+    ],
+    name: "addValidator",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getActiveValidators",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+    ],
+    name: "getValidatorInfo",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "initialStake",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "currentStake",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "repEarned",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "numberOfValidations",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "lastValidatedAt",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "isActive",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "addr",
+        type: "address",
+      },
+    ],
+    name: "isValidator",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "minValidatorStake",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+    ],
+    name: "removeValidator",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+    ],
+    name: "rewardValidator",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "stakeAsValidator",
     outputs: [],
     stateMutability: "payable",
@@ -932,81 +869,15 @@ export const contractABI = [
   },
   {
     inputs: [],
-    name: "symbol",
+    name: "token",
     outputs: [
       {
-        internalType: "string",
+        internalType: "contract CrailoToken",
         name: "",
-        type: "string",
+        type: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "totalSupply",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "transfer",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "transferFrom",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1032,12 +903,51 @@ export const contractABI = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "_newStake",
+        type: "uint256",
+      },
+    ],
+    name: "updateMinValidatorStake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_newReward",
+        type: "uint256",
+      },
+    ],
+    name: "updateValidatorReward",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "validatorList",
+    outputs: [
+      {
         internalType: "address",
         name: "",
         type: "address",
       },
     ],
-    name: "validatorStakes",
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "validatorReward",
     outputs: [
       {
         internalType: "uint256",
@@ -1059,9 +969,516 @@ export const contractABI = [
     name: "validators",
     outputs: [
       {
+        internalType: "uint256",
+        name: "initialStake",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "currentStake",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "repEarned",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "numberOfValidations",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "lastValidatedAt",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "isActive",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+
+export const validatorAddress = "0x287b67fcbe7f7e3917d57c1ec21d6ae714f67ed5";
+
+export const disputeABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_validatorContract",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "OwnableInvalidOwner",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "OwnableUnauthorizedAccount",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "string",
+        name: "param",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "newValue",
+        type: "uint256",
+      },
+    ],
+    name: "ConfigUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "disputeId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "listingId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "buyer",
+        type: "address",
+      },
+    ],
+    name: "DisputeCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "disputeId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "productValid",
+        type: "bool",
+      },
+    ],
+    name: "DisputeResolved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "disputeId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "vote",
+        type: "bool",
+      },
+    ],
+    name: "DisputeVoted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "activeDisputes",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "listingId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "buyer",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "seller",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "reason",
+        type: "string",
+      },
+    ],
+    name: "createDispute",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "disputeCounter",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "disputeDuration",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "disputes",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "listingId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "buyer",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "seller",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "reason",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "createdAt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+      {
+        internalType: "enum DisputeContract.DisputeStatus",
+        name: "status",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "yesVotes",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "noVotes",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getActiveDisputes",
+    outputs: [
+      {
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "disputeId",
+        type: "uint256",
+      },
+    ],
+    name: "getDispute",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "listingId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "buyer",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "seller",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "reason",
+        type: "string",
+      },
+      {
+        internalType: "enum DisputeContract.DisputeStatus",
+        name: "status",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "yesVotes",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "noVotes",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "disputeId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+    ],
+    name: "hasValidatorVoted",
+    outputs: [
+      {
         internalType: "bool",
         name: "",
         type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "requiredVotes",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "disputeId",
+        type: "uint256",
+      },
+    ],
+    name: "resolveDispute",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_newDuration",
+        type: "uint256",
+      },
+    ],
+    name: "updateDisputeDuration",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_newRequiredVotes",
+        type: "uint256",
+      },
+    ],
+    name: "updateRequiredVotes",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "validatorContract",
+    outputs: [
+      {
+        internalType: "contract ValidatorContract",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -1087,4 +1504,4 @@ export const contractABI = [
   },
 ];
 
-export const contractAddress = "0x632bE79998304372074F291e78Daf55c6e959C03";
+export const disputeAddress = "0x851033134153795E6A2ca8cdc5BB924623E953c4";

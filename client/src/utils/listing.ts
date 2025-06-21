@@ -1,5 +1,5 @@
 import { useWriteContract } from "wagmi";
-import { contractAddress, contractABI } from "@/app/abi";
+import { escrowABI, escrowAddress } from "@/app/abi";
 import { parseEther } from "viem";
 
 export const useListing = () => {
@@ -11,10 +11,14 @@ export const useListing = () => {
     price: string
   ) => {
     try {
-      console.log(description, imageHash, price);
+      console.log("Creating a listing with description, imageHash, price: ", {
+        description,
+        imageHash,
+        price,
+      });
       const tx = await writeContractAsync({
-        address: contractAddress,
-        abi: contractABI,
+        address: escrowAddress,
+        abi: escrowABI,
         functionName: "createListing",
         args: [
           "iPhone 13 Pro Max, 256GB, Excellent condition",
@@ -34,5 +38,25 @@ export const useListing = () => {
     }
   };
 
-  return { createListing };
+  const cancelListing = async (listingId: number) => {
+    try {
+      console.log("Seller cancelling listing for propertyId:", listingId);
+      const tx = await writeContractAsync({
+        address: escrowAddress,
+        abi: escrowABI,
+        functionName: "cancelListing",
+        args: [listingId],
+      });
+
+      if (tx) {
+        console.log("Successful Transaction", tx);
+        return tx;
+      }
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      throw error;
+    }
+  };
+
+  return { createListing, cancelListing };
 };
