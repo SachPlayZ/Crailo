@@ -9,8 +9,18 @@ interface HeaderProps {
 }
 
 export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
   return (
-    <header className="sticky top-1 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-2 group">
           <div className="h-8 w-8 rounded-lg bg-green-600 flex items-center justify-center transition-transform group-hover:scale-110">
@@ -20,34 +30,34 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
         </div>
 
         <nav className="hidden md:flex items-center space-x-6">
-          <a
-            href="#how-it-works"
+          <button
+            onClick={() => scrollToSection("how-it-works")}
             className="text-sm font-medium hover:text-green-600 transition-colors relative group"
           >
             How It Works
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
-          </a>
-          <a
-            href="#why-crailo"
+          </button>
+          <button
+            onClick={() => scrollToSection("why-crailo")}
             className="text-sm font-medium hover:text-green-600 transition-colors relative group"
           >
             Why Crailo
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
-          </a>
-          <a
-            href="#validators"
+          </button>
+          <button
+            onClick={() => scrollToSection("validators")}
             className="text-sm font-medium hover:text-green-600 transition-colors relative group"
           >
             Validators
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
-          </a>
-          <a
-            href="#community"
+          </button>
+          <button
+            onClick={() => scrollToSection("community")}
             className="text-sm font-medium hover:text-green-600 transition-colors relative group"
           >
             Community
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
-          </a>
+          </button>
         </nav>
 
         <div className="flex items-center space-x-4">

@@ -54,27 +54,27 @@ export default function CrailoLanding() {
       </div>
 
       {/* How It Works */}
-      <div ref={howItWorksRef}>
+      <div id="how-it-works" ref={howItWorksRef}>
         <HowItWorksSection howItWorksInView={howItWorksInView} />
       </div>
 
       {/* Why Crailo */}
-      <div ref={whyCrailoRef}>
+      <div id="why-crailo" ref={whyCrailoRef}>
         <WhyCrailoSection whyCrailoInView={whyCrailoInView} />
       </div>
 
       {/* Validator System */}
-      <div ref={validatorsRef}>
+      <div id="validators" ref={validatorsRef}>
         <ValidatorSection validatorsInView={validatorsInView} />
       </div>
 
       {/* Case Scenarios */}
-      <div ref={scenariosRef}>
+      <div id="scenarios" ref={scenariosRef}>
         <ScenariosSection scenariosInView={scenariosInView} />
       </div>
 
       {/* Testimonials */}
-      <div ref={testimonialsRef}>
+      <div id="community" ref={testimonialsRef}>
         <TestimonialsSection testimonialsInView={testimonialsInView} />
       </div>
 
