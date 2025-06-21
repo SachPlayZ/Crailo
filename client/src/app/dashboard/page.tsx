@@ -204,9 +204,7 @@ const getStatusBadge = (status: string, type: "buying" | "listing") => {
         );
     }
   }
-};
-  }
-};
+}; 
 
 const getStatusFromNumber = (status: number) => {
   switch (status) {
