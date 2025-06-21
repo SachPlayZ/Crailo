@@ -307,6 +307,71 @@ export const escrowABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "getActiveListings",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "seller",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "imageHash",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "price",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "active",
+            type: "bool",
+          },
+          {
+            internalType: "address",
+            name: "buyer",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "sellerStake",
+            type: "uint256",
+          },
+          {
+            internalType: "enum MainEscrow.ListingStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "createdAt",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct MainEscrow.Listing[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -355,6 +420,71 @@ export const escrowABI = [
         internalType: "enum MainEscrow.ListingStatus",
         name: "status",
         type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getListings",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "seller",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "imageHash",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "price",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "active",
+            type: "bool",
+          },
+          {
+            internalType: "address",
+            name: "buyer",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "sellerStake",
+            type: "uint256",
+          },
+          {
+            internalType: "enum MainEscrow.ListingStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "createdAt",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct MainEscrow.Listing[]",
+        name: "",
+        type: "tuple[]",
       },
     ],
     stateMutability: "view",
@@ -587,7 +717,7 @@ export const escrowABI = [
   },
 ];
 
-export const escrowAddress = "0x3E4c1Df312B7dF41a2224fE1C31eEaB41a1ECDE0";
+export const escrowAddress = "0x3Bd5514E6B4E9fc4354a838C9b054D57ACea146A";
 
 export const validatorABI = [
   {
@@ -1004,7 +1134,7 @@ export const validatorABI = [
   },
 ];
 
-export const validatorAddress = "0x287b67fcbe7f7e3917d57c1ec21d6ae714f67ed5";
+export const validatorAddress = "0xD1fad78449A9E65CB0cC562a2f3DC80818094935";
 
 export const disputeABI = [
   {
@@ -1504,4 +1634,4 @@ export const disputeABI = [
   },
 ];
 
-export const disputeAddress = "0x851033134153795E6A2ca8cdc5BB924623E953c4";
+export const disputeAddress = "0xee8866FAA6A721a08db5d362Cf8ef881135e9c6a";
