@@ -31,6 +31,13 @@ contract MainEscrow is Ownable {
         Cancelled
     }
 
+    struct UserHistory {
+        address user;
+        uint256[] listingIds;
+    }
+
+    mapping(address => UserHistory) private userHistories;
+
     // Configuration constants - updatable
     uint256 public sellerStakePercent = 10; // 10%
     uint256 public buyerPenaltyPercent = 5; // 5%
@@ -112,6 +119,9 @@ contract MainEscrow is Ownable {
         });
 
         sellerStakes[msg.sender] += msg.value;
+        userHistories[msg.sender].user = msg.sender;
+        userHistories[msg.sender].listingIds.push(listingCounter);
+
         emit ListingCreated(listingCounter, msg.sender, price);
     }
 
@@ -125,6 +135,9 @@ contract MainEscrow is Ownable {
         listing.buyer = msg.sender;
         listing.status = ListingStatus.Committed;
         escrowBalances[msg.sender] += msg.value;
+
+        userHistories[msg.sender].user = msg.sender;
+        userHistories[msg.sender].listingIds.push(listingId);
 
         emit BuyerCommitted(listingId, msg.sender, msg.value);
     }
@@ -339,5 +352,21 @@ contract MainEscrow is Ownable {
         require(_newPercent <= 100, "Cannot exceed 100%");
         buyerPenaltyPercent = _newPercent;
         emit ConfigUpdated("buyerPenaltyPercent", _newPercent);
+    }
+
+    /**
+     * @dev Returns the full listing history (Listing structs) for a particular address
+     * @param user The address to query
+     * @return Array of Listing structs associated with the user
+     */
+    function getUserHistory(
+        address user
+    ) external view returns (Listing[] memory) {
+        uint256[] storage ids = userHistories[user].listingIds;
+        Listing[] memory history = new Listing[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            history[i] = listings[ids[i]];
+        }
+        return history;
     }
 }

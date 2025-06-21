@@ -129,6 +129,34 @@ export const useListing = () => {
     }
   };
 
+  const getUserHistory = async (address: string) => {
+    try {
+      console.log("Getting User Buy History: ");
+    } catch (error) {
+      console.error("Failed to fetch listings", error);
+    }
+  };
+
+  const useUserHistory = async (userAddress: string) => {
+    const {
+      data,
+      isLoading,
+      error,
+      refetch: refetchUserHistory,
+    } = useReadContract({
+      address: escrowAddress,
+      abi: escrowABI,
+      functionName: "getUserHistory",
+      args: [userAddress],
+    });
+
+    return {
+      historyListings: data,
+      isLoading,
+      refetchUserHistory,
+    };
+  };
+
   return {
     createListing,
     cancelListing,
@@ -136,5 +164,6 @@ export const useListing = () => {
     confirmDelivery,
     getListings,
     refetchListings,
+    useUserHistory,
   };
 };
