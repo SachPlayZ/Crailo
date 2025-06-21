@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Carousel } from "@/components/ui/carousel";
 import ListItemDialog from "./ListItemDialog";
-import ListingDetailsModal from "./ListingDetailsModal";
+import CustomModal from "./CustomModal";
 import {
   Search,
   Filter,
@@ -53,20 +53,21 @@ const ShowListingsPage = () => {
   const sampleListings: Listing[] = [
     {
       title: "MacBook Pro 2023 - M2 Chip",
-      description: "Excellent condition, barely used. Comes with original box and charger.",
+      description:
+        "Excellent condition, barely used. Comes with original box and charger.",
       price: 1200,
       location: "San Francisco, CA",
       seller: {
         name: "Alex Chen",
-        address: "0x0000..."
+        address: "0x0000...",
       },
       images: [
         "https://ipfs.io/ipfs/bafkreidw724vbzcbq4q3srdgqnfy5badkivgouvqe6b4tbdv2hovcgaodq",
-        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee"
+        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee",
       ],
       category: "electronics",
       condition: "Like New",
-      escrowAmount: 120
+      escrowAmount: 120,
     },
     {
       title: "Nike Air Jordan 1 Retro",
@@ -75,15 +76,15 @@ const ShowListingsPage = () => {
       location: "Not Specified",
       seller: {
         name: "Anonymous",
-        address: "0x0000..."
+        address: "0x0000...",
       },
       images: [
         "https://ipfs.io/ipfs/bafkreidw724vbzcbq4q3srdgqnfy5badkivgouvqe6b4tbdv2hovcgaodq",
-        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee"
+        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee",
       ],
       category: "fashion",
       condition: "Not Specified",
-      escrowAmount: 35
+      escrowAmount: 35,
     },
     {
       title: "Gaming PC Setup - RTX 4070",
@@ -92,15 +93,15 @@ const ShowListingsPage = () => {
       location: "Not Specified",
       seller: {
         name: "Anonymous",
-        address: "0x0000..."
+        address: "0x0000...",
       },
       images: [
         "https://ipfs.io/ipfs/bafkreidw724vbzcbq4q3srdgqnfy5badkivgouvqe6b4tbdv2hovcgaodq",
-        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee"
+        "https://ipfs.io/ipfs/bafkreigz4zv6szfpv5za4funfzvcl3maw4i6wbcjzc3cmwqbp5itsptsee",
       ],
       category: "electronics",
       condition: "Not Specified",
-      escrowAmount: 180
+      escrowAmount: 180,
     },
   ];
 
@@ -234,10 +235,7 @@ const ShowListingsPage = () => {
               >
                 <CardHeader className="pb-4 flex-shrink-0">
                   {listing.images && listing.images.length > 0 && (
-                    <Carousel 
-                      images={listing.images}
-                      className="mb-4"
-                    />
+                    <Carousel images={listing.images} className="mb-4" />
                   )}
 
                   <div className="flex items-start justify-between mb-2">
@@ -310,7 +308,7 @@ const ShowListingsPage = () => {
                     </div>
 
                     {/* Action Button */}
-                    <Button 
+                    <Button
                       className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       onClick={() => {
                         setSelectedListing(listing);
@@ -330,9 +328,9 @@ const ShowListingsPage = () => {
 
       {/* Details Modal */}
       {selectedListing && (
-        <ListingDetailsModal
+        <CustomModal
           isOpen={isDetailsModalOpen}
-          onOpenChange={setIsDetailsModalOpen}
+          onClose={() => setIsDetailsModalOpen(false)}
           listing={selectedListing}
           onConfirmDeposit={handleConfirmDeposit}
         />
