@@ -1,6 +1,5 @@
 import { useWriteContract, useReadContract } from "wagmi";
 import { disputeABI, disputeAddress } from "@/app/abi";
-import { Address } from "viem";
 
 export function useCreateDispute() {
   const { writeContractAsync, isPending, isSuccess, isError, error, data } =

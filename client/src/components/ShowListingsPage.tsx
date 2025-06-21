@@ -353,12 +353,15 @@ const ShowListingsPage = () => {
                           {listing.category}
                         </Badge>
                       </div>
-                      <div className="flex items-center space-x-1 text-green-600 dark:text-green-400">
+                        <div className="flex items-center space-x-1 text-green-600 dark:text-green-400">
                         <DollarSign className="w-3 h-3" />
-                        <span className="text-xs font-medium">
-                          {listing.escrowAmount} escrow
+                        <span 
+                          className="text-xs font-medium truncate max-w-[60px] hover:max-w-none transition-all duration-300" 
+                          title={`${listing.escrowAmount} escrow`}
+                        >
+                          {listing.escrowAmount.toFixed(5)}
                         </span>
-                      </div>
+                        </div>
                     </div>
 
                     {/* Action Button */}

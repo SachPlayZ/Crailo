@@ -21,8 +21,6 @@ import {
   coinbaseWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 
-import { useTheme } from "next-themes";
-
 import { getConfig } from "./wagmi";
 
 coinbaseWallet.preference = "smartWalletOnly";
@@ -54,7 +52,6 @@ export default function Providers(props: {
   children: ReactNode;
   initialState?: State;
 }) {
-  const { theme } = useTheme();
   const [config] = useState(() => getConfig(connectors));
   const [queryClient] = useState(() => new QueryClient());
 
