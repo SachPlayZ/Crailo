@@ -282,6 +282,52 @@ contract MainEscrow is Ownable {
         );
     }
 
+    /**
+     * @dev Returns all listings as an array
+     * @return Array of all listings with their complete information
+     */
+    function getListings() external view returns (Listing[] memory) {
+        Listing[] memory allListings = new Listing[](listingCounter);
+
+        for (uint256 i = 1; i <= listingCounter; i++) {
+            allListings[i - 1] = listings[i];
+        }
+
+        return allListings;
+    }
+
+    /**
+     * @dev Returns only active listings (status = Active)
+     * @return Array of active listings
+     */
+    function getActiveListings() external view returns (Listing[] memory) {
+        // First, count active listings
+        uint256 activeCount = 0;
+        for (uint256 i = 1; i <= listingCounter; i++) {
+            if (
+                listings[i].status == ListingStatus.Active && listings[i].active
+            ) {
+                activeCount++;
+            }
+        }
+
+        // Create array with exact size
+        Listing[] memory activeListings = new Listing[](activeCount);
+        uint256 currentIndex = 0;
+
+        // Fill the array
+        for (uint256 i = 1; i <= listingCounter; i++) {
+            if (
+                listings[i].status == ListingStatus.Active && listings[i].active
+            ) {
+                activeListings[currentIndex] = listings[i];
+                currentIndex++;
+            }
+        }
+
+        return activeListings;
+    }
+
     // Configuration update functions
     function updateSellerStakePercent(uint256 _newPercent) external onlyOwner {
         require(_newPercent <= 100, "Cannot exceed 100%");
