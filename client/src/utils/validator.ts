@@ -57,10 +57,10 @@ export const useValidatorRemove = () => {
 export const useStakeValidator = () => {
   const { writeContractAsync } = useWriteContract();
 
-  const stakeAsValidator = async (userAddress: `0x${string}`) => {
+  const stakeAsValidator = async () => {
     try {
       const tx = await writeContractAsync({
-        address: userAddress,
+        address: validatorAddress as `0x${string}`,
         abi: validatorABI,
         functionName: "stakeAsValidator",
         args: [],
