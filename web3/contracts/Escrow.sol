@@ -327,7 +327,10 @@ contract Escrow is ERC20, Ownable(msg.sender) {
     }
 
     function stakeAsValidator() external payable {
-        require(msg.value >= 1 ether, "Minimum 1 ETH stake required");
+        require(
+            msg.value >= 1000000000000000 wei,
+            "Minimum 0.002 ETH stake required"
+        );
         validatorStakes[msg.sender] += msg.value;
         validators[msg.sender] = true;
         emit ValidatorAdded(msg.sender);

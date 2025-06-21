@@ -9,7 +9,7 @@ contract CrailoToken is ERC20, Ownable {
     constructor() ERC20("CrailoToken", "CRAILO") Ownable(msg.sender) {
         _mint(msg.sender, 1000000 * 10 ** 18);
     }
-    
+
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
     }
