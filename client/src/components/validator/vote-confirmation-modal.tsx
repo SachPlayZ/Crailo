@@ -13,11 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { useVoteOnDispute } from "@/utils/Dispute";
+import { useAccount } from "wagmi";
 
 interface VoteConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onVoteResult: (result: boolean | null) => void;
   voteType: "valid" | "misleading" | null;
   productName: string;
   disputeId: string;
@@ -26,32 +27,66 @@ interface VoteConfirmationModalProps {
 export function VoteConfirmationModal({
   isOpen,
   onClose,
-  onConfirm,
+  onVoteResult,
   voteType,
   productName,
   disputeId,
 }: VoteConfirmationModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { voteOnDispute, isPending: isVotePending } = useVoteOnDispute();
-
+  // const { voteOnDispute, isPending: isVotePending } = useVoteOnDispute();
+  const { address: voterAddress } = useAccount();
   const handleConfirm = async () => {
     if (!voteType) return;
 
     setIsSubmitting(true);
     try {
-      await voteOnDispute({
-        disputeId,
-        productValid: voteType === "valid" ? "true" : "false",
+      // First, submit the vote
+      // await voteOnDispute({
+      //   disputeId,
+      //   productValid: voteType === "valid" ? "true" : "false",
+      // });
+
+      // Then, fetch the vote result
+      // First submit the vote
+      const voteResponse = await fetch('/api/updateVote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          productId: disputeId,
+          voteType: voteType === "valid" ? "yes" : "no",
+          voterAddress: voterAddress,
+        }),
       });
-      onConfirm();
+
+      const voteData = await voteResponse.json();
+
+      // Then get the updated vote status
+      const getVoteResponse = await fetch('/api/getVote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId: disputeId }),
+      });
+
+      const data = await getVoteResponse.json();
+      
+      // Call onVoteResult with the majority result
+      onVoteResult(data.majorityResult);
+      
+      // Close the modal
+      onClose();
     } catch (error) {
-      console.error("Error voting on dispute:", error);
+      console.error("Error processing vote:", error);
+      onVoteResult(null);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const isAnyLoading = isSubmitting || isVotePending;
+  const isAnyLoading = isSubmitting;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

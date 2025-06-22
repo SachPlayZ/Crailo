@@ -66,4 +66,24 @@ const userSchema = new mongoose.Schema<IUser>({
   timestamps: true,
 });
 
+const voteSchema = new mongoose.Schema({
+  productId: {
+    type: String,
+    required: true,
+  },
+  yesVotes: {
+    type: Number,
+    default: 0,
+  },
+  noVotes: {
+    type: Number,
+    default: 0,
+  },
+  voterAddresses: {
+    type: [String],
+    default: []
+  }
+})
+
 export default mongoose.models.User || mongoose.model<IUser>('User', userSchema); 
+export const Vote = mongoose.models.Vote || mongoose.model('Vote', voteSchema);

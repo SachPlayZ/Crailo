@@ -184,6 +184,7 @@ export function DisputeCard() {
   const [transformedData, setTransformedData] = useState<TransformedDispute[]>(
     []
   );
+  const [voteResult, setVoteResult] = useState<boolean | null>(null);
 
   // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -195,8 +196,8 @@ export function DisputeCard() {
   // If we have active disputes, get the first listing ID to test
   const firstListingId =
     activeDisputeDetails &&
-    Array.isArray(activeDisputeDetails) &&
-    activeDisputeDetails[0]
+      Array.isArray(activeDisputeDetails) &&
+      activeDisputeDetails[0]
       ? Number(activeDisputeDetails[0].listingId)
       : 0;
 
@@ -278,9 +279,22 @@ export function DisputeCard() {
     fetchAndTransformData();
   }, [activeDisputeDetails, productData]);
 
-  const handleVoteClick = (voteType: "valid" | "misleading") => {
-    setPendingVote(voteType);
+  const handleVoteClick = (voteType: "yes" | "no") => {
+    setPendingVote(voteType === "yes" ? "valid" : "misleading");
     setShowConfirmation(true);
+  };
+
+  const handleVoteResult = (result: boolean | null) => {
+    setVoteResult(result);
+    // Here you can trigger any actions that depend on the vote result
+    if (result !== null) {
+      // Example: Update UI or trigger other actions based on the vote result
+      console.log(
+        `Vote result: ${
+          result ? "Product is valid" : "Product is misleading"
+        }`
+      );
+    }
   };
 
   const handleConfirmVote = () => {
@@ -351,11 +365,11 @@ export function DisputeCard() {
                   className={cn(
                     "text-xs px-2 py-1",
                     dispute.status === "pending" &&
-                      "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
+                    "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
                     dispute.status === "voted" &&
-                      "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
+                    "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
                     dispute.status === "resolved" &&
-                      "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
+                    "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
                   )}
                 >
                   {dispute.status === "pending" && (
@@ -440,7 +454,7 @@ export function DisputeCard() {
             {dispute.status === "pending" && (
               <div className="grid grid-cols-2 gap-3">
                 <Button
-                  onClick={() => handleVoteClick("valid")}
+                  onClick={() => handleVoteClick("yes")}
                   className="bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                   variant="outline"
                 >
@@ -448,7 +462,7 @@ export function DisputeCard() {
                   Product is Valid
                 </Button>
                 <Button
-                  onClick={() => handleVoteClick("misleading")}
+                  onClick={() => handleVoteClick("no")}
                   className="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
                   variant="outline"
                 >
@@ -463,8 +477,8 @@ export function DisputeCard() {
 
       <VoteConfirmationModal
         isOpen={showConfirmation}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmVote}
+        onClose={() => setShowConfirmation(false)}
+        onVoteResult={handleVoteResult}
         voteType={pendingVote}
         productName={transformedData[0]?.productName || ""}
         disputeId={transformedData[0]?.id || ""}
