@@ -31,6 +31,7 @@ import {
   Shield,
   ArrowLeft,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { useAccount } from "wagmi";
 import { PinataSDK } from "pinata";
@@ -103,7 +104,8 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
     }
   };
 
-  const { createListing } = useListing();
+  const { createListing, isWritePending: isCreateListingPending } =
+    useListing();
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
@@ -203,10 +205,19 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
 
   const handleClose = () => {
     setOpen(false);
-    setCurrentStep(1);
     setFormData({ name: "", category: "", price: "", description: "" });
     setImages([]);
+    setCurrentStep(1);
   };
+
+  const isFormValid = () => {
+    if (currentStep === 1) {
+      return formData.name && formData.category;
+    }
+    return formData.price && formData.description;
+  };
+
+  const isAnyLoading = isSubmitting || isCreateListingPending;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -254,58 +265,11 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
               className={`transition-all duration-300 ease-in-out ${
                 currentStep === 1
                   ? "translate-x-0 opacity-100"
-                  : "translate-x-full opacity-0 absolute inset-0"
+                  : "-translate-x-full opacity-0 absolute inset-0"
               }`}
             >
               {/* Step 1: Basic Information */}
               <div className="space-y-6">
-                {/* Image Upload Section */}
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">
-                    Images (up to 5)
-                  </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {/* Upload Button */}
-                    <div className="relative">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        disabled={images.length >= 5}
-                      />
-                      <div className="aspect-square border-2 border-dashed border-green-300 dark:border-green-700 rounded-lg flex flex-col items-center justify-center bg-green-50 dark:bg-green-950/50 hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors">
-                        <Upload className="w-6 h-6 text-green-600 dark:text-green-400 mb-2" />
-                        <span className="text-xs text-green-600 dark:text-green-400 text-center">
-                          {images.length >= 5 ? "Max reached" : "Add Image"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Preview Images */}
-                    {images.map((image, index) => (
-                      <div key={index} className="relative aspect-square">
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-full object-cover rounded-lg border border-green-200 dark:border-green-800"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Upload clear, high-quality images to attract buyers
-                  </p>
-                </div>
-
                 {/* Item Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">
@@ -313,7 +277,8 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                   </Label>
                   <Input
                     id="name"
-                    placeholder="e.g., MacBook Pro 2023 - M2 Chip"
+                    type="text"
+                    placeholder="Enter the name of your item..."
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="border-green-200 dark:border-green-800 focus:border-green-500 dark:focus:border-green-400"
@@ -321,7 +286,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                   />
                 </div>
 
-                {/* Category Selection */}
+                {/* Category */}
                 <div className="space-y-2">
                   <Label htmlFor="category" className="text-sm font-medium">
                     Category *
@@ -331,7 +296,6 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                     onValueChange={(value) =>
                       handleInputChange("category", value)
                     }
-                    required
                   >
                     <SelectTrigger className="border-green-200 dark:border-green-800 focus:border-green-500 dark:focus:border-green-400">
                       <SelectValue placeholder="Select a category" />
@@ -339,14 +303,54 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                     <SelectContent>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center space-x-2">
+                          <span className="flex items-center space-x-2">
                             <span>{category.icon}</span>
                             <span>{category.name}</span>
-                          </div>
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Images</Label>
+                  <div className="grid grid-cols-5 gap-4">
+                    {images.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Preview ${index + 1}`}
+                          className="w-20 h-20 rounded-lg object-cover border border-green-200 dark:border-green-800"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {images.length < 5 && (
+                      <label className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 border-dashed border-green-200 dark:border-green-800 hover:border-green-500 dark:hover:border-green-400 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                          multiple={true}
+                        />
+                        <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                      </label>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {5 - images.length} image slots remaining
+                  </p>
                 </div>
               </div>
             </div>
@@ -440,6 +444,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                   variant="outline"
                   onClick={handleClose}
                   className="w-full sm:w-auto"
+                  disabled={isAnyLoading}
                 >
                   Cancel
                 </Button>
@@ -447,7 +452,10 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                   type="button"
                   onClick={nextStep}
                   disabled={
-                    !formData.name || !formData.category || isTransitioning
+                    !formData.name ||
+                    !formData.category ||
+                    isTransitioning ||
+                    isAnyLoading
                   }
                   className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 transition-all duration-200"
                 >
@@ -461,7 +469,7 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                   type="button"
                   variant="outline"
                   onClick={prevStep}
-                  disabled={isTransitioning}
+                  disabled={isTransitioning || isAnyLoading}
                   className="w-full sm:w-auto transition-all duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -471,13 +479,16 @@ const ListItemDialog = ({ children }: ListItemDialogProps) => {
                   type="submit"
                   className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 transition-all duration-200"
                   disabled={
-                    isSubmitting ||
+                    isAnyLoading ||
                     !formData.price ||
                     !formData.description ||
                     isTransitioning
                   }
                 >
-                  {isSubmitting ? "Listing..." : "Create Listing"}
+                  {isAnyLoading && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
+                  {isAnyLoading ? "Creating Listing..." : "Create Listing"}
                   <Plus className="w-4 h-4 ml-2" />
                 </Button>
               </>

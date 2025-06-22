@@ -319,6 +319,7 @@ export function DisputeCard() {
         onConfirm={handleConfirmVote}
         voteType={pendingVote}
         productName={transformedData[0]?.productName || ""}
+        disputeId={transformedData[0]?.id || ""}
       />
     </div>
   );

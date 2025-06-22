@@ -35,6 +35,7 @@ import {
   Upload,
   Plus,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -196,15 +197,20 @@ type DisputeFormValues = z.infer<typeof disputeFormSchema>;
 
 export default function CrailoDashboard() {
   const { address } = useAccount();
-  const { historyListings, getUserHistoryData } = useUserHistory(
-    address as string
-  );
+  const {
+    historyListings,
+    getUserHistoryData,
+    isLoading: isHistoryLoading,
+  } = useUserHistory(address as string);
   const [activeTab, setActiveTab] = useState("buying");
   const [listings, setListings] = useState<Listing[]>([]);
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [disputeImages, setDisputeImages] = useState<string[]>([]);
-  const { createDispute } = useCreateDispute();
+  const [isReleasingEscrow, setIsReleasingEscrow] = useState(false);
+  const [isLoadingListings, setIsLoadingListings] = useState(false);
+  const { createDispute, isPending: isCreateDisputePending } =
+    useCreateDispute();
 
   const form = useForm<DisputeFormValues>({
     resolver: zodResolver(disputeFormSchema as any),
@@ -219,6 +225,7 @@ export default function CrailoDashboard() {
   }, []);
 
   const handleHistoryClick = async () => {
+    setIsLoadingListings(true);
     try {
       const history = await getUserHistoryData();
       if (Array.isArray(history)) {
@@ -239,6 +246,8 @@ export default function CrailoDashboard() {
       }
     } catch (error) {
       console.error("Error fetching user history:", error);
+    } finally {
+      setIsLoadingListings(false);
     }
   };
 
@@ -251,7 +260,11 @@ export default function CrailoDashboard() {
 
   const disputeCount = listings.filter((item) => item.status === 2).length;
 
-  const { cancelListing } = useListing();
+  const {
+    cancelListing,
+    confirmDelivery,
+    isWritePending: isCancelListingPending,
+  } = useListing();
 
   const removeListing = (id: number) => async () => {
     try {
@@ -260,6 +273,20 @@ export default function CrailoDashboard() {
       console.log(`Listing ${id} removed successfully`);
     } catch (error) {
       console.error("Error removing listing:", error);
+    }
+  };
+
+  const releaseEscrow = (id: number) => async () => {
+    setIsReleasingEscrow(true);
+    try {
+      await confirmDelivery(id);
+      // Optionally, refetch listings or update state to reflect the change
+      console.log(`Escrow released for listing ${id}`);
+      await handleHistoryClick(); // Refresh the listings
+    } catch (error) {
+      console.error("Error releasing escrow:", error);
+    } finally {
+      setIsReleasingEscrow(false);
     }
   };
 
@@ -466,14 +493,21 @@ export default function CrailoDashboard() {
                     variant="outline"
                     onClick={() => setDisputeDialogOpen(false)}
                     className="border border-border/50 text-foreground hover:bg-background/50"
+                    disabled={isCreateDisputePending}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+                    disabled={isCreateDisputePending}
                   >
-                    Submit Dispute
+                    {isCreateDisputePending && (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    )}
+                    {isCreateDisputePending
+                      ? "Submitting..."
+                      : "Submit Dispute"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -496,7 +530,11 @@ export default function CrailoDashboard() {
               <Button
                 onClick={handleHistoryClick}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 px-8 py-3 relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                disabled={isHistoryLoading}
               >
+                {isHistoryLoading && (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                )}
                 <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
                 Refresh History
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
@@ -535,7 +573,19 @@ export default function CrailoDashboard() {
 
           {/* Buying History Tab */}
           <TabsContent value="buying" className="space-y-6">
-            {buyingHistory.length === 0 ? (
+            {isLoadingListings ? (
+              <Card className="text-center py-12 backdrop-blur-xl bg-card/30 border border-border/50 shadow-2xl rounded-2xl">
+                <CardContent>
+                  <Loader2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    Loading purchases...
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Please wait while we fetch your buying history.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : buyingHistory.length === 0 ? (
               <Card className="text-center py-12 backdrop-blur-xl bg-card/30 border border-border/50 shadow-2xl rounded-2xl">
                 <CardContent>
                   <TruckIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -597,8 +647,12 @@ export default function CrailoDashboard() {
                           <div className="flex space-x-3 mt-4">
                             <Button
                               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25 rounded-xl"
-                              disabled={item.status !== 1}
+                              disabled={item.status !== 1 || isReleasingEscrow}
+                              onClick={releaseEscrow(Number(item.id))}
                             >
+                              {isReleasingEscrow && (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              )}
                               Release Escrow
                             </Button>
                             <Button
@@ -622,7 +676,19 @@ export default function CrailoDashboard() {
 
           {/* My Listings Tab */}
           <TabsContent value="listings" className="space-y-6">
-            {myListings.length === 0 ? (
+            {isLoadingListings ? (
+              <Card className="text-center py-12 backdrop-blur-xl bg-card/30 border border-border/50 shadow-2xl rounded-2xl">
+                <CardContent>
+                  <Loader2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    Loading listings...
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Please wait while we fetch your listings.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : myListings.length === 0 ? (
               <Card className="text-center py-12 backdrop-blur-xl bg-card/30 border border-border/50 shadow-2xl rounded-2xl">
                 <CardContent>
                   <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -680,9 +746,14 @@ export default function CrailoDashboard() {
                             <Button
                               variant="outline"
                               className="border border-red-400/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300 hover:border-red-400 transition-all duration-300 bg-transparent backdrop-blur-sm rounded-xl hover:scale-105"
-                              disabled={item.status >= 1}
+                              disabled={
+                                item.status >= 1 || isCancelListingPending
+                              }
                               onClick={removeListing(Number(item.id))}
                             >
+                              {isCancelListingPending && (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              )}
                               <Trash2 className="w-4 h-4 mr-2" />
                               Remove Listing
                             </Button>
