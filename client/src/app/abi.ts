@@ -864,7 +864,7 @@ export const escrowABI = [
   },
 ];
 
-export const escrowAddress = "0x4c41E3d779bB35114e2776B11410c84FA728a284";
+export const escrowAddress = "0x889857E9C57D57e6E96f9F78E81AcaE196f4C199";
 
 export const validatorABI = [
   {
@@ -1281,7 +1281,7 @@ export const validatorABI = [
   },
 ];
 
-export const validatorAddress = "0xF67339fEaEEe4D93673f0Be0342fF1babd8dee52";
+export const validatorAddress = "0x79f4C6C123548a632763aA1dC918de2b9C0a68DE";
 
 export const disputeABI = [
   {
@@ -1861,4 +1861,4 @@ export const disputeABI = [
   },
 ];
 
-export const disputeAddress = "0x28569A5aA623610362f541Ca19f7d6504987548E";
+export const disputeAddress = "0xbf234Afce4f1a69076C319F79373b8A6E0A4CAC6";

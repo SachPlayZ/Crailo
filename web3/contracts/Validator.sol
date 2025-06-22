@@ -75,7 +75,7 @@ contract ValidatorContract is Ownable {
         emit ValidatorRemoved(msg.sender);
     }
 
-    function rewardValidator(address validator) external onlyOwner {
+    function rewardValidator(address validator) external {
         require(validators[validator].isActive, "Validator not active");
 
         Validator storage val = validators[validator];

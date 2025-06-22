@@ -8,7 +8,6 @@ import "./Crailo.sol";
 import "./Validator.sol";
 import "./Dispute.sol";
 
-// ============ MAIN ESCROW CONTRACT ============
 contract MainEscrow is Ownable {
     struct Listing {
         uint256 id;
@@ -151,21 +150,27 @@ contract MainEscrow is Ownable {
             "Cannot cancel committed listing"
         );
 
-        uint256 slashAmount = (listing.sellerStake * 10) / 100;
-        uint256 returnAmount = listing.sellerStake - slashAmount;
+        // Calculate slash amount (10% of seller's stake)
+        uint256 totalStake = listing.sellerStake;
+        uint256 slashAmount = (totalStake * 10) / 100;
+        uint256 returnAmount = totalStake - slashAmount;
 
-        // Deduct the full stake from seller's total stakes
-        sellerStakes[msg.sender] -= listing.sellerStake;
+        // Update internal stake record
+        sellerStakes[msg.sender] -= totalStake;
+
+        // Send return amount back to seller
+        if (returnAmount > 0) {
+            (bool success, ) = payable(msg.sender).call{value: returnAmount}(
+                ""
+            );
+            require(success, "Return transfer failed");
+        }
 
         // Update listing status
         listing.active = false;
         listing.status = ListingStatus.Cancelled;
 
-        // Return the remaining stake (90%) to the seller
-        payable(msg.sender).transfer(returnAmount);
-
         emit StakeSlashed(msg.sender, slashAmount, "Listing cancelled");
-        emit ListingCancelled(listingId);
     }
 
     function confirmDelivery(
