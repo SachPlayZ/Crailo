@@ -11,7 +11,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, XCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { useVoteOnDispute } from "@/utils/Dispute";
 
 interface VoteConfirmationModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface VoteConfirmationModalProps {
   onConfirm: () => void;
   voteType: "valid" | "misleading" | null;
   productName: string;
+  disputeId: string;
 }
 
 export function VoteConfirmationModal({
@@ -27,16 +29,29 @@ export function VoteConfirmationModal({
   onConfirm,
   voteType,
   productName,
+  disputeId,
 }: VoteConfirmationModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { voteOnDispute, isPending: isVotePending } = useVoteOnDispute();
 
   const handleConfirm = async () => {
+    if (!voteType) return;
+
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    onConfirm();
-    setIsSubmitting(false);
+    try {
+      await voteOnDispute({
+        disputeId,
+        productValid: voteType === "valid" ? "true" : "false",
+      });
+      onConfirm();
+    } catch (error) {
+      console.error("Error voting on dispute:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const isAnyLoading = isSubmitting || isVotePending;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -84,14 +99,14 @@ export function VoteConfirmationModal({
           <Button
             variant="outline"
             onClick={onClose}
-            disabled={isSubmitting}
+            disabled={isAnyLoading}
             className="border-green-200 dark:border-green-800 text-foreground hover:bg-green-50 dark:hover:bg-green-900/20"
           >
             Cancel
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={isSubmitting}
+            disabled={isAnyLoading}
             className={cn(
               "font-medium transition-all duration-200",
               voteType === "valid"
@@ -99,7 +114,8 @@ export function VoteConfirmationModal({
                 : "bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/25"
             )}
           >
-            {isSubmitting ? "Submitting..." : "Confirm Vote"}
+            {isAnyLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {isAnyLoading ? "Submitting..." : "Confirm Vote"}
           </Button>
         </DialogFooter>
       </DialogContent>

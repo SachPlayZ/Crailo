@@ -18,7 +18,9 @@ import {
   DollarSign,
   CheckCircle,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
+import { useListing } from "@/utils/listing";
 
 interface ListingDetailsModalProps {
   isOpen: boolean;
@@ -49,9 +51,22 @@ const ListingDetailsModal: React.FC<ListingDetailsModalProps> = ({
   listing,
   onConfirmDeposit,
 }) => {
+  const { commitToBuy, isWritePending: isCommitToBuyPending } = useListing();
+
   const formatDate = (timestamp?: number) => {
     if (!timestamp) return "Recently";
     return new Date(timestamp * 1000).toLocaleString();
+  };
+
+  const handleConfirmDeposit = async () => {
+    if (!listing.id) return;
+
+    try {
+      await commitToBuy(listing.id, listing.price.toString());
+      onConfirmDeposit();
+    } catch (error) {
+      console.error("Error committing to buy:", error);
+    }
   };
 
   return (
@@ -182,15 +197,20 @@ const ListingDetailsModal: React.FC<ListingDetailsModalProps> = ({
               variant="outline"
               onClick={() => onOpenChange(false)}
               className="border-green-200 dark:border-green-800"
+              disabled={isCommitToBuyPending}
             >
               Cancel
             </Button>
             <Button
-              onClick={onConfirmDeposit}
+              onClick={handleConfirmDeposit}
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 px-8 py-3 text-lg font-semibold shadow-lg shadow-green-500/10 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              disabled={isCommitToBuyPending}
             >
+              {isCommitToBuyPending && (
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              )}
               <DollarSign className="w-5 h-5 mr-2" />
-              Send Deposit
+              {isCommitToBuyPending ? "Processing..." : "Send Deposit"}
             </Button>
           </DialogFooter>
         </div>

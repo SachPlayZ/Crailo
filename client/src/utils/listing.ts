@@ -4,13 +4,13 @@ import { parseEther } from "viem";
 import { useState } from "react";
 
 export const useListing = () => {
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, isPending: isWritePending } = useWriteContract();
   const [list, setList] = useState([]);
   const {
     data: listings,
     refetch: refetchListings,
     status,
-    isLoading,
+    isLoading: isReadLoading,
     isError,
     error,
   } = useReadContract({
@@ -137,6 +137,10 @@ export const useListing = () => {
     confirmDelivery,
     getListings,
     refetchListings,
+    isWritePending,
+    isReadLoading,
+    isError,
+    error,
   };
 };
 
