@@ -6,91 +6,8 @@ import { Header } from "@/components/validator/header";
 import { DisputeFilters } from "@/components/validator/dispute-filters";
 import { DisputeCard } from "@/components/validator/dispute-card";
 
-// Use the provided mockDisputes
-const mockDisputes = [
-  {
-    id: "1",
-    productName: "Vintage Rolex Submariner",
-    productImage: "/placeholder.svg?height=48&width=48",
-    sellerAddress: "0x1a2b...3c4d",
-    buyerAddress: "0x5e6f...7g8h",
-    originalImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    receivedImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    descriptionMismatch:
-      "Product received appears to be a replica, not authentic vintage Rolex as described.",
-    timeAgo: "3h ago",
-    status: "pending" as const,
-  },
-  {
-    id: "2",
-    productName: "Nike Air Jordan 1 Retro",
-    productImage: "/placeholder.svg?height=48&width=48",
-    sellerAddress: "0x9i0j...1k2l",
-    buyerAddress: "0x3m4n...5o6p",
-    originalImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    receivedImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    descriptionMismatch:
-      "Size mismatch - received US 9 instead of advertised US 10.5.",
-    timeAgo: "5h ago",
-    status: "pending" as const,
-  },
-  {
-    id: "3",
-    productName: "MacBook Pro 16-inch M2",
-    productImage: "/placeholder.svg?height=48&width=48",
-    sellerAddress: "0x7q8r...9s0t",
-    buyerAddress: "0x1u2v...3w4x",
-    originalImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    receivedImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    descriptionMismatch: "",
-    timeAgo: "1d ago",
-    status: "voted" as const,
-    userVote: "valid" as const,
-  },
-  {
-    id: "4",
-    productName: "Hermès Birkin Bag",
-    productImage: "/placeholder.svg?height=48&width=48",
-    sellerAddress: "0x5y6z...7a8b",
-    buyerAddress: "0x9c0d...1e2f",
-    originalImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    receivedImages: [
-      "/placeholder.svg?height=128&width=128",
-      "/placeholder.svg?height=128&width=128",
-    ],
-    descriptionMismatch:
-      "Color significantly different from listing photos - appears to be a different shade entirely.",
-    timeAgo: "2d ago",
-    status: "resolved" as const,
-  },
-];
-
 export default function DisputesPanel() {
   const [activeFilter, setActiveFilter] = useState("all");
-  const [disputes, setDisputes] = useState(mockDisputes);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -101,11 +18,6 @@ export default function DisputesPanel() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const filteredDisputes = disputes.filter((dispute) => {
-    if (activeFilter === "all") return true;
-    return dispute.status === activeFilter;
-  });
 
   if (isLoading) {
     return (
@@ -178,35 +90,12 @@ export default function DisputesPanel() {
                 activeFilter={activeFilter}
                 onFilterChange={setActiveFilter}
               />
-              <div className="text-sm text-muted-foreground">
-                Showing {filteredDisputes.length} dispute
-                {filteredDisputes.length !== 1 ? "s" : ""}
-              </div>
             </div>
 
-            {/* Disputes Grid */}
+            {/* Disputes Card */}
             <div className="grid gap-6">
-              {filteredDisputes.map((dispute, index) => (
-                <div
-                  key={dispute.id}
-                  className="animate-in slide-in-from-bottom-4 duration-300"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <DisputeCard dispute={dispute} />
-                </div>
-              ))}
+              <DisputeCard />
             </div>
-
-            {filteredDisputes.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-muted-foreground text-lg mb-2">
-                  No disputes found
-                </div>
-                <div className="text-muted-foreground text-sm">
-                  Try adjusting your filters or check back later.
-                </div>
-              </div>
-            )}
           </main>
         </div>
       </div>
