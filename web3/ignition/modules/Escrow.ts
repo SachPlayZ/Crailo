@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const Escrow = await ethers.deployContract("Escrow");
+  const Escrow = await ethers.deployContract("MainEscrow");
 
   console.log("Waiting for deployment confirmation...");
 

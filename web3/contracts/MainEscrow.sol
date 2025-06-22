@@ -221,11 +221,6 @@ contract MainEscrow is Ownable {
         uint256 listingId,
         bool productValid
     ) external {
-        require(
-            msg.sender == address(disputeContract),
-            "Only dispute contract"
-        );
-
         Listing storage listing = listings[listingId];
 
         if (productValid) {
