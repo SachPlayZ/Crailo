@@ -4,15 +4,99 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
 import { VoteConfirmationModal } from "./vote-confirmation-modal";
 import { cn } from "@/lib/utils";
 import { getDisputesArr } from "@/utils/Dispute";
 import { useReadContract } from "wagmi";
 import { escrowABI, escrowAddress } from "@/app/abi";
-import useEmblaCarousel from 'embla-carousel-react';
+import useEmblaCarousel from "embla-carousel-react";
 
-const ImageCarousel = ({ images }: { images: string[] }) => {
+// Image Modal Component
+const ImageModal = ({
+  isOpen,
+  onClose,
+  images,
+  currentIndex,
+  onNext,
+  onPrev,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  images: string[];
+  currentIndex: number;
+  onNext: () => void;
+  onPrev: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div className="relative max-w-4xl max-h-[90vh] p-4">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrev();
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onNext();
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </>
+        )}
+
+        <img
+          src={images[currentIndex] || "/placeholder.svg"}
+          alt={`Product image ${currentIndex + 1}`}
+          className="max-w-full max-h-full object-contain rounded-lg"
+          onClick={(e) => e.stopPropagation()}
+        />
+
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+            {currentIndex + 1} / {images.length}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ImageCarousel = ({
+  images,
+  onImageClick,
+}: {
+  images: string[];
+  onImageClick: (index: number) => void;
+}) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
 
   const scrollPrev = () => emblaApi?.scrollPrev();
@@ -20,7 +104,7 @@ const ImageCarousel = ({ images }: { images: string[] }) => {
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full h-32 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+      <div className="w-full h-72 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
         <p className="text-sm text-muted-foreground">No images available</p>
       </div>
     );
@@ -35,7 +119,8 @@ const ImageCarousel = ({ images }: { images: string[] }) => {
               <img
                 src={image || "/placeholder.svg"}
                 alt={`Product image ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg border border-green-200 dark:border-green-800"
+                className="w-full h-72 object-cover rounded-lg border border-green-200 dark:border-green-800 cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => onImageClick(index)}
               />
             </div>
           ))}
@@ -93,15 +178,27 @@ interface TransformedDispute {
 
 export function DisputeCard() {
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [pendingVote, setPendingVote] = useState<"valid" | "misleading" | null>(null);
-  const [transformedData, setTransformedData] = useState<TransformedDispute[]>([]);
+  const [pendingVote, setPendingVote] = useState<"valid" | "misleading" | null>(
+    null
+  );
+  const [transformedData, setTransformedData] = useState<TransformedDispute[]>(
+    []
+  );
+
+  // Image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImages, setModalImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const { activeDisputeDetails } = getDisputesArr();
 
   // If we have active disputes, get the first listing ID to test
-  const firstListingId = activeDisputeDetails && Array.isArray(activeDisputeDetails) && activeDisputeDetails[0]
-    ? Number(activeDisputeDetails[0].listingId)
-    : 0;
+  const firstListingId =
+    activeDisputeDetails &&
+    Array.isArray(activeDisputeDetails) &&
+    activeDisputeDetails[0]
+      ? Number(activeDisputeDetails[0].listingId)
+      : 0;
 
   // Use a single hook call for testing
   type ProductDataType = [
@@ -114,7 +211,11 @@ export function DisputeCard() {
     bigint
   ];
 
-  const { data: productData } = useReadContract<typeof escrowABI, "getListing", ProductDataType>({
+  const { data: productData } = useReadContract<
+    typeof escrowABI,
+    "getListing",
+    ProductDataType
+  >({
     abi: escrowABI,
     address: escrowAddress,
     functionName: "getListing",
@@ -124,8 +225,12 @@ export function DisputeCard() {
 
   useEffect(() => {
     const fetchAndTransformData = async () => {
-      if (!activeDisputeDetails || !Array.isArray(activeDisputeDetails) || !productData) {
-        console.log('No active disputes or product data');
+      if (
+        !activeDisputeDetails ||
+        !Array.isArray(activeDisputeDetails) ||
+        !productData
+      ) {
+        console.log("No active disputes or product data");
         return;
       }
 
@@ -135,16 +240,18 @@ export function DisputeCard() {
 
         // Fetch dispute metadata from IPFS
         const disputeMetadataResponse = await fetch(disputeDetails.imageHash);
-        const disputeMetadata: DisputeMetadata = await disputeMetadataResponse.json();
+        const disputeMetadata: DisputeMetadata =
+          await disputeMetadataResponse.json();
 
         // Fetch product metadata from IPFS
-        const productMetadataResponse = await fetch(productData?.[3] ?? '');
-        const productMetadata: ProductMetadata = await productMetadataResponse.json();
+        const productMetadataResponse = await fetch(productData?.[3] ?? "");
+        const productMetadata: ProductMetadata =
+          await productMetadataResponse.json();
 
         const statusMap = {
           0: "pending",
           1: "voted",
-          2: "resolved"
+          2: "resolved",
         } as const;
 
         const transformedDispute: TransformedDispute = {
@@ -158,13 +265,13 @@ export function DisputeCard() {
           descriptionMismatch: disputeDetails.reason,
           timeAgo: disputeMetadata.timestamp,
           status: statusMap[disputeDetails.status as keyof typeof statusMap],
-          userVote: undefined
+          userVote: undefined,
         };
 
         setTransformedData([transformedDispute]);
-        console.log('Transformed dispute:', transformedDispute);
+        console.log("Transformed dispute:", transformedDispute);
       } catch (error) {
-        console.error('Error transforming dispute data:', error);
+        console.error("Error transforming dispute data:", error);
       }
     };
 
@@ -186,6 +293,29 @@ export function DisputeCard() {
     setPendingVote(null);
   };
 
+  // Image modal handlers
+  const handleImageClick = (images: string[], index: number) => {
+    setModalImages(images);
+    setCurrentImageIndex(index);
+    setImageModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setImageModalOpen(false);
+    setModalImages([]);
+    setCurrentImageIndex(0);
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % modalImages.length);
+  };
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + modalImages.length) % modalImages.length
+    );
+  };
+
   if (transformedData.length === 0) {
     return <div>Loading disputes...</div>;
   }
@@ -193,7 +323,10 @@ export function DisputeCard() {
   return (
     <div className="space-y-4">
       {transformedData.map((dispute) => (
-        <Card key={dispute.id} className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10">
+        <Card
+          key={dispute.id}
+          className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10"
+        >
           <CardContent className="p-6">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
@@ -218,11 +351,11 @@ export function DisputeCard() {
                   className={cn(
                     "text-xs px-2 py-1",
                     dispute.status === "pending" &&
-                    "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
+                      "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
                     dispute.status === "voted" &&
-                    "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
+                      "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
                     dispute.status === "resolved" &&
-                    "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
+                      "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
                   )}
                 >
                   {dispute.status === "pending" && (
@@ -234,7 +367,8 @@ export function DisputeCard() {
                   {dispute.status === "resolved" && (
                     <CheckCircle className="w-3 h-3 mr-1" />
                   )}
-                  {dispute.status.charAt(0).toUpperCase() + dispute.status.slice(1)}
+                  {dispute.status.charAt(0).toUpperCase() +
+                    dispute.status.slice(1)}
                 </Badge>
               </div>
             </div>
@@ -244,13 +378,17 @@ export function DisputeCard() {
               <div className="bg-green-50/50 dark:bg-green-900/20 rounded-lg p-3">
                 <p className="text-xs text-muted-foreground mb-1">Seller</p>
                 <p className="text-sm text-foreground font-mono">
-                  {dispute.sellerAddress.slice(0, 6) + "..." + dispute.sellerAddress.slice(-5)}
+                  {dispute.sellerAddress.slice(0, 6) +
+                    "..." +
+                    dispute.sellerAddress.slice(-5)}
                 </p>
               </div>
               <div className="bg-green-50/50 dark:bg-green-900/20 rounded-lg p-3">
                 <p className="text-xs text-muted-foreground mb-1">Buyer</p>
                 <p className="text-sm text-foreground font-mono">
-                  {dispute.buyerAddress.slice(0, 6) + "..." + dispute.buyerAddress.slice(-5)}
+                  {dispute.buyerAddress.slice(0, 6) +
+                    "..." +
+                    dispute.buyerAddress.slice(-5)}
                 </p>
               </div>
             </div>
@@ -265,13 +403,23 @@ export function DisputeCard() {
                   <p className="text-xs text-muted-foreground">
                     Original Listing
                   </p>
-                  <ImageCarousel images={dispute.originalImages} />
+                  <ImageCarousel
+                    images={dispute.originalImages}
+                    onImageClick={(index) => {
+                      handleImageClick(dispute.originalImages, index);
+                    }}
+                  />
                 </div>
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">
                     Received Product
                   </p>
-                  <ImageCarousel images={dispute.receivedImages} />
+                  <ImageCarousel
+                    images={dispute.receivedImages}
+                    onImageClick={(index) => {
+                      handleImageClick(dispute.receivedImages, index);
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -320,6 +468,15 @@ export function DisputeCard() {
         voteType={pendingVote}
         productName={transformedData[0]?.productName || ""}
         disputeId={transformedData[0]?.id || ""}
+      />
+
+      <ImageModal
+        isOpen={imageModalOpen}
+        onClose={handleModalClose}
+        images={modalImages}
+        currentIndex={currentImageIndex}
+        onNext={handleNextImage}
+        onPrev={handlePrevImage}
       />
     </div>
   );
