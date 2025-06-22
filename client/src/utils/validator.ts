@@ -100,17 +100,39 @@ export const useStakeValidator = () => {
 };
 
 export const useValidatorGet = (userAddress: string) => {
-  const { data: validatorInfo, refetch: refetchValidatorInfo, isLoading } =
-    useReadContract({
-      address: validatorAddress,
-      abi: validatorABI,
-      functionName: "getValidatorInfo",
-      args: [userAddress],
-    });
+  const {
+    data: validatorInfo,
+    refetch: refetchValidatorInfo,
+    isLoading,
+  } = useReadContract({
+    address: validatorAddress,
+    abi: validatorABI,
+    functionName: "getValidatorInfo",
+    args: [userAddress],
+  });
 
   return {
     validatorInfo,
     refetchValidatorInfo,
+    isLoading,
+  };
+};
+
+export const checkValidator = (userAddress: string) => {
+  const {
+    data: isValidator,
+    refetch,
+    isLoading,
+  } = useReadContract({
+    address: validatorAddress,
+    abi: validatorABI,
+    functionName: "isValidator",
+    args: [userAddress],
+  });
+
+  return {
+    isValidator,
+    checkValidator,
     isLoading,
   };
 };
